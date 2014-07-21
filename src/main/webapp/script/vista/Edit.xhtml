@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:itcs="http://java.sun.com/jsf/composite/components/filterView">
+
+    <ui:composition template="/script/template_inbox.xhtml">
+        <ui:define name="title">
+            <h:outputText value="Editar Vista de Casos"></h:outputText>
+        </ui:define>
+
+        <ui:define name="head">
+           
+        </ui:define>
+
+        <ui:define name="body">
+
+            <div class="page-header">
+                <h1 class="col-xs-12 text-left-sm">
+                    <i class="fa fa-eye page-header-icon"></i>&nbsp;&nbsp;<span class="text-light-gray">Vistas / </span>Editar Vista #{vistaController.selected.nombre}</h1>
+            </div> <!-- / .page-header -->
+
+            <div class="row">
+                <div class="col-md-9">
+
+                    <h:form id="form" styleClass="panel panel-transparent form-horizontal">
+
+                        <p:messages id="messages" globalOnly="true"/>
+
+                        <div class="panel-body">
+
+                            <div class="row form-group">
+                                <label class="col-sm-3 control-label"><h:outputLabel value="#{bundle.VistaLabel_nombre}" for="nombre" style="font-weight: bold"/></label>
+                                <div class="col-sm-9">
+                                    <h:inputText id="nombre" value="#{vistaController.selected.nombre}" styleClass="form-control"
+                                                 title="#{bundle.VistaTitle_nombre}" required="true" requiredMessage="#{bundle.VistaRequiredMessage_nombre}"/>
+                                    <p:message for="nombre"/>
+                                </div>
+                            </div>
+
+
+
+                            <div class="row form-group">
+                                <label class="col-sm-3 control-label">Condiciones</label>
+                                <div class="col-sm-9">
+                                    <itcs:filterView id="panelFilter0" controllerMBean="#{vistaController}" 
+                                                     filterHelper="#{vistaController.filterHelper2}" showApplyAction="false"
+                                                     parentId=":form:panelFilter0"
+                                                     update=":mainform:messages :form:panelFilter0:panelFilter :form"/>
+
+                                </div>
+                            </div>
+                            <div class="row form-group">
+                                <label class="col-sm-3 control-label"><h:outputLabel value="Visibilidad" for="VisibilidadPanel" style="font-weight: bold"/></label>
+                                <div class="col-sm-9">
+                                    <p:outputPanel id="VisibilidadPanel">  
+                                        <p:selectOneRadio id="visibility" value="#{vistaController.visibilityOption}" layout="custom">  
+                                            <f:selectItem itemLabel="Visible por Todos" itemValue="1" />  
+                                            <f:selectItem itemLabel="Grupo" itemValue="2" />  
+                                            <f:selectItem itemLabel="Area" itemValue="3" />     
+                                            <p:ajax update=":form:VisibilidadPanel" listener="#{vistaController.handleAnyChangeEvent()}" /> 
+                                        </p:selectOneRadio>  
+
+
+
+                                        <h:panelGrid>
+                                            <h:panelGrid columns="3">
+                                                <p:radioButton id="visibleToAll" for="visibility" itemIndex="0"/>  
+                                                <h:outputLabel value="Visible por Todos:" for="visibleToAll" style="font-weight: bold"/>
+
+                                                <p:selectOneButton id="visibleToAllSelect" value="#{vistaController.selected.visibleToAll}" 
+                                                                   rendered="#{vistaController.visibilityOption eq 1}"
+                                                                   required="true" requiredMessage="#{bundle.VistaRequiredMessage_visibleToAll}">  
+                                                    <f:selectItem itemLabel="Si, para todo el mundo" itemValue="true" />  
+                                                    <f:selectItem itemLabel="No, sólo yo" itemValue="false" />  
+                                                </p:selectOneButton> 
+                                            </h:panelGrid>
+
+                                            <h:panelGrid columns="3">
+                                                <p:radioButton id="idGrupo" for="visibility" itemIndex="1"/>  
+                                                <h:outputLabel value="Grupo:" for="idGrupo" style="font-weight: bold"/>
+                                                <p:selectOneMenu id="idGrupoSelect" value="#{vistaController.selected.idGrupo}" required="true" requiredMessage="Debe Seleccionar un grupo si desea Visibilidad a nivel de Grupo."
+                                                                 rendered="#{vistaController.visibilityOption eq 2}" >
+                                                    <f:selectItems value="#{grupoController.itemsAvailableSelectOne}"/>
+                                                </p:selectOneMenu> 
+                                            </h:panelGrid>
+
+                                            <h:panelGrid columns="3">
+                                                <p:radioButton id="idArea" for="visibility" itemIndex="2"/>  
+                                                <h:outputLabel value="Area:" for="idArea" style="font-weight: bold"/>
+                                                <p:selectOneMenu id="idAreaSelect" value="#{vistaController.selected.idArea}" 
+                                                                 converter="AreaConverter"
+                                                                 required="true" requiredMessage="Debe Seleccionar un Area si desea Visibilidad a nivel de Area."
+                                                                 rendered="#{vistaController.visibilityOption eq 3}">
+                                                    <f:selectItems value="#{areaController.itemsAvailableSelectMany}"/>
+                                                </p:selectOneMenu>
+                                            </h:panelGrid>
+                                        </h:panelGrid>  
+                                    </p:outputPanel> 
+                                </div>
+                            </div>
+
+                            <div class="row form-group">
+                                <label class="col-sm-3 control-label"><h:outputLabel value="Descripción:" for="descripcion" style="font-weight: bold"/></label>
+                                <div class="col-sm-9">
+                                    <h:inputTextarea id="descripcion" styleClass="form-control"
+                                                     value="#{vistaController.selected.descripcion}" title="#{bundle.VistaTitle_descripcion}" />
+
+                                </div>
+                            </div>
+
+                            <div class="row form-group">
+                                <label class="col-sm-3 control-label"><h:outputLabel value="Cambiar Autor:" for="idUsuarioCreadaPor" rendered="#{filtroAcceso.perteneceAGrupoSistema()}"/></label>
+                                <div class="col-sm-9">
+                                    <h:selectOneMenu id="idUsuarioCreadaPor" styleClass="form-control"
+                                                     value="#{vistaController.selected.idUsuarioCreadaPor}" rendered="#{filtroAcceso.perteneceAGrupoSistema()}"
+                                                     title="Esta opcion es visible solo por usuarios del Grupo Sistema." required="true" requiredMessage="#{bundle.EditVistaRequiredMessage_idUsuarioCreadaPor}">
+                                        <f:selectItems value="#{usuarioController.itemsAvailableSelectOne}"/>
+                                    </h:selectOneMenu>
+
+                                </div>
+                            </div>
+                        </div>
+                        <div class="panel-footer text-right">
+                            <p:commandButton ajax="false" action="#{vistaController.update}" value="Guardar" update=":mainform:messages"/>
+
+                            <p:commandButton ajax="false" action="#{vistaController.prepareList}" value="Cancelar" immediate="true"/>
+                        </div>
+                    </h:form>
+                </div>
+            </div>
+
+
+        </ui:define>
+    </ui:composition>
+
+</html>

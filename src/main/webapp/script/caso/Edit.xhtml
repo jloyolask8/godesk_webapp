@@ -1,0 +1,1928 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:c="http://java.sun.com/jsp/jstl/core"
+      xmlns:pe="http://primefaces.org/ui/extensions"
+      xmlns:itcs2="http://java.sun.com/jsf/composite/components/customField">
+
+    <ui:composition template="/script/template_inbox.xhtml">
+        <ui:define name="title">
+            <h:outputText value="Caso #{casoController.selected.idCaso}: #{casoController.selected.tema}"></h:outputText>
+        </ui:define>
+
+        <ui:define name="head">
+
+            <style type="text/css">
+                .page-header .pull-right {
+                    padding-top: 5px;
+                }
+                .page-header .pull-right > * {
+                    display: inline-block;
+                    vertical-align:middle;
+                }
+
+                .ui-autocomplete-multiple-container {
+                    width: auto !important;
+                }
+                .form-group {
+                    margin-bottom: 5px;
+                }
+            </style>
+
+        </ui:define>
+
+
+
+
+        <ui:define name="body">
+
+            <div class="container-fluid">
+                <h:form>
+                    <div class="page-header">
+                        <div class="row">
+                            <div class="col-sm-10 col-xs-10">
+
+
+                                <h:commandLink id="prio" disabled="#{casoController.selected.closed}" styleClass="m-details-star">
+                                    <p:graphicImage library="images" name="#{casoController.selected.esPrioritario ? 'star-enabled.png':'star-disabled.png'}" title="Importante!"/>
+                                    <p:ajax id="aj2" listener="#{casoController.changePriority(casoController.selected, casoController.selected.esPrioritario)}" update="prio"/>
+                                </h:commandLink>
+
+                                <!--estado ABIERTO - CERRADO -->
+                                <h:outputText value="#{casoController.selected.idEstado.nombre}" title="#{casoController.selected.estadoAlerta.nombre}" 
+                                              rendered="#{casoController.selected.isOpen()}" styleClass="label label-#{casoController.selected.estadoAlerta.styleClass}">
+                                </h:outputText>                       
+                                <h:outputText value="#{casoController.selected.idEstado.nombre}" title="Caso cerrado" 
+                                              rendered="#{not casoController.selected.isOpen()}" styleClass="label label-default">
+                                </h:outputText>   
+                                <!--fin estado ABIERTO - CERRADO -->
+                                <h1>
+                                    <span class="text-light-gray">
+                                        <h:outputText value="#{casoController.selected.tipoCaso ne null ? casoController.selected.tipoCaso.nombre:'Caso' } \##{casoController.selected.idCaso}:"/>
+                                    </span>
+                                    <h:outputText styleClass="text-semibold" 
+                                                  value="#{casoController.selected.tema}"/>
+                                </h1>
+                                <!-- TAGS-->
+                                <h:panelGroup id="etiquetasGroup">
+                                    <ui:repeat value="#{casoController.selected.etiquetaStringList}" var="et">
+                                        <h:outputText styleClass="label label-info label-tag" value="#{et}"/>
+                                    </ui:repeat>
+                                </h:panelGroup>
+                                <!-- fin TAGS-->
+                            </div>
+                            <div class="col-sm-2 col-xs-2">
+                                <div class="pages pull-right">
+                                    <ul class="pager pager-xs pull-right" style="margin: 0px !important;">
+                                        <li>
+                                            <h:commandLink action="#{casoController.prepareEditPreviusItem()}" style="font-weight: bold"
+                                                           title="Ir al caso anterior"
+                                                           disabled="#{casoController.selectedItemIndex eq casoController.pagination.pageFirstItem}"
+                                                           rendered="#{casoController.pagination.itemsCount > 0}">
+                                                <i class="fa fa-long-arrow-left"></i>         
+                                            </h:commandLink>
+
+                                        </li>
+                                        <li>
+                                            <h:commandLink action="#{casoController.prepareEditNextItem()}" style="font-weight: bold"
+                                                           title="Ir al caso siguiente"
+                                                           disabled="#{casoController.selectedItemIndex eq casoController.pagination.pageLastItem}"
+                                                           rendered="#{casoController.pagination.itemsCount > 0}">
+                                                <i class="fa fa-long-arrow-right"></i>       
+                                            </h:commandLink>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div> <!-- / .page-header -->
+                </h:form>
+
+
+
+                <div class="row">
+                    <div class="col-md-4 col-sm-5 col-lg-3 col-sm-push-7 col-md-push-8 col-lg-push-9 sidebar"><!-- menu-right -->
+
+                        <h:form id="info-panel">
+                            <div class="panel panel-primary panel-dark widget-profile">
+                                <div class="panel-heading">
+                                    <div class="widget-profile-bg-icon"><i class="fa fa-flask"></i></div>
+                                    <img src="#{facesContext.externalContext.requestContextPath}/resources/images/pixel-admin/avatar.png" class="widget-profile-avatar"/>
+                                    <div class="widget-profile-header">
+                                        <span>
+                                            <h:outputText id="clienteNotNull" 
+                                                          value="#{casoController.selected.emailCliente.cliente ne null ? casoController.selected.emailCliente.cliente.capitalName:''}" /></span><br/>
+
+                                        <p:commandLink value="#{casoController.selected.emailCliente.emailCliente}" 
+                                                       title="#{casoController.selected.emailCliente.emailCliente}"                                                          
+                                                       action="#{emailClienteController.prepareView(casoController.selected.emailCliente)}" 
+                                                       ajax="false" 
+                                                       immediate="true"/>
+
+                                    </div>
+                                </div> <!-- / .panel-heading -->
+                                <div class="list-group">
+
+                                    <a href="#" class="list-group-item"><i class="fa fa-clock-o list-group-icon"></i>Creado vía <i title="Caso creado a travéz del canal: #{casoController.selected.idCanal.nombre}" 
+                                                                                                                                   class="fa #{casoController.getCanalStyleClass(casoController.selected.idCanal)}"></i>
+                                        <span class="badge badge-danger"><h:outputText id="fechaCreacion" value="#{casoController.prettyDate(casoController.selected.fechaCreacion)}" title="#{casoController.formatDate(casoController.selected.fechaCreacion)}"/></span></a>
+                                    <a href="#" class="list-group-item"><i class="fa fa-clock-o list-group-icon"></i>Modificado:<span class="badge badge-danger"><h:outputText id="fechaModificacion" value="#{casoController.prettyDate(casoController.selected.fechaModif)}" title="#{casoController.formatDate(casoController.selected.fechaModif)}"/></span></a>
+                                    <a href="#" class="list-group-item"><i class="fa fa-bell-o list-group-icon"></i>Commentarios del Agente<span class="badge badge-primary">#{casoController.cantidadDeNotas}</span></a>
+                                    <a href="#" class="list-group-item"><i class="fa fa-bell-o list-group-icon"></i>Respuestas del Agente<span class="badge badge-primary">#{casoController.cantidadDeRespuestasACliente}</span></a>
+                                    <a href="#" class="list-group-item"><i class="fa fa-bell-o list-group-icon"></i>Commentarios del Cliente<span class="badge badge-warning">#{casoController.cantidadDeRespuestasDelCliente}</span></a>
+                                    <h:panelGroup rendered="#{casoController.selected.idCategoria ne null}">
+                                        <div class="list-group-item"><i class="fa fa-folder list-group-icon"></i>Categoría
+                                            <h:panelGroup id="idCategoria2" styleClass="label label-info pull-right" >
+                                                <h:outputText                                       
+                                                    value="#{casoController.selected.idCategoria.toString()}" 
+                                                    title="#{bundle.EditCasoTitle_idCategoria}"/>
+                                                <p:commandLink style="font-weight: bold; color: #fff;"
+                                                               actionListener="#{casoController.removeCategory()}" 
+                                                               immediate="true"
+                                                               update=":info-panel">
+                                                    <i class="fa fa-times-circle"></i>
+                                                </p:commandLink>
+                                            </h:panelGroup>
+                                        </div>
+                                    </h:panelGroup>
+                                    <ul class="breadcrumb" style="display: block;">
+                                        <li>Asignado a <h:outputText value="#{casoController.selected.idArea.nombre}"/></li>					
+                                        <li class="active">
+                                            <p:commandLink id="owner" actionListener="#{usuarioController.prepareViewUserInDialog(casoController.selected.owner)}"  
+                                                           value="#{casoController.selected.owner.capitalName}" 
+                                                           immediate="true"
+                                                           style="color: #4183C4 !important;"
+                                                           disabled="#{casoController.selected.closed or not usuarioController.puedeEditar(casoController.selected.owner)}" 
+                                                           title="Ver Datos del Agente" />
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </h:form>
+
+
+
+                        <div class="panel-group" id="accordion-example">
+                            <div class="panel">
+                                <div class="panel-heading">
+                                    <a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion-example" href="#collapseOne">
+                                        Propiedades del caso
+                                    </a>
+                                </div> <!-- / .panel-heading -->
+                                <div id="collapseOne" class="panel-collapse in"> 
+
+                                    <h:form id="formint1" styleClass="panel">
+
+                                        <div class="panel-body" style="padding: 10px !important;">
+                                            <div class="row">
+                                                <div class="col-sm-6">
+                                                    <div class="form-group no-margin-hr" >
+                                                        <h:outputLabel styleClass="control-label text-sm text-slim"
+                                                                       value="Tipo:" for="idTipoCaso"/>
+                                                        <h:selectOneMenu id="idTipoCaso"  styleClass="form-control input-sm" disabled="#{casoController.selected.closed}" 
+                                                                         required="true" requiredMessage="El tipo de caso es requerido."
+                                                                         converter="TipoCasoControllerConverter"
+                                                                         value="#{casoController.selected.tipoCaso}" >
+                                                            <f:selectItems value="#{applicationBean.tipoCasoAvailableList}" var="tipo" 
+                                                                           itemLabel="#{tipo.nombre}" itemValue="#{tipo}" itemDescription="#{tipo.descripcion}"/>
+                                                            <p:ajax update=":formint1"/>
+
+                                                        </h:selectOneMenu>
+                                                    </div>
+                                                </div><!-- col-sm-6 -->
+                                                <div class="col-sm-6">
+                                                    <div class="form-group no-margin-hr">
+                                                        <h:outputLabel styleClass="control-label text-sm text-slim"
+                                                                       value="#{bundle.EditCasoLabel_idSubEstado}" for="idSubEstado"/>
+                                                        <h:selectOneMenu id="idSubEstado" styleClass="form-control input-sm"   rendered="#{!casoController.selected.closed}"
+                                                                         required="true" requiredMessage="El subestado es requerido"
+                                                                         value="#{casoController.selected.idSubEstado}" >
+
+                                                            <f:selectItems value="#{casoController.itemsSubEstadoCasoAvailableSelectOneCasoAbierto}" var="subEstad" itemDescription="#{subEstad.description}"/>
+                                                        </h:selectOneMenu>
+                                                        <h:outputText styleClass="label" 
+                                                                      style="background: \##{casoController.selected.idSubEstado.backgroundColor}; color: \##{casoController.selected.idSubEstado.fontColor};" value="#{casoController.selected.idSubEstado.nombre}"
+                                                                      rendered="#{casoController.selected.closed}"/>
+                                                    </div>
+                                                </div><!-- col-sm-6 -->
+                                            </div><!-- row -->
+
+                                            <div class="row">
+                                                <div class="col-sm-6">
+                                                    <div class="form-group no-margin-hr">
+                                                        <h:outputLabel styleClass="control-label text-sm text-slim"
+                                                                       value="#{bundle.EditCasoLabel_idPrioridad}" for="idPrioridad" />
+                                                        <h:selectOneMenu styleClass="form-control input-sm" disabled="#{casoController.selected.closed}"
+                                                                         required="true"
+                                                                         id="idPrioridad" value="#{casoController.selected.idPrioridad}" >
+                                                            <f:selectItems value="#{prioridadController.itemsAvailableSelectMany}"/>
+                                                        </h:selectOneMenu>
+                                                    </div>
+                                                </div><!-- col-sm-6 -->
+                                                <div class="col-sm-6">
+                                                    <div class="form-group no-margin-hr">
+                                                        <h:outputLabel 
+                                                            styleClass="control-label text-sm text-slim"
+                                                            value="#{bundle.EditCasoLabel_nextResponseDue}" for="nextResponseDue" />
+                                                        <h:inputText id="nextResponseDue" styleClass="form-control form_datetime input-sm" disabled="#{casoController.selected.closed}" 
+                                                                     title="#{bundle.EditCasoTitle_nextResponseDue}" value="#{casoController.selected.nextResponseDue}" 
+                                                                     required="true" requiredMessage="Favor ingrese un valor para el sla.">
+                                                            <f:convertDateTime pattern="dd/MM/yyyy HH:mm" />
+                                                        </h:inputText>
+
+                                                        <script type="text/javascript">
+                                                            $('.form_datetime').datetimepicker({
+                                                                language: 'es',
+                                                                format: 'dd/mm/yyyy hh:ii',
+                                                                viewformat: 'dd/mm/yyyy hh:ii',
+                                                                todayBtn: true,
+                                                                autoclose: true,
+                                                                todayHighlight: true,
+                                                                weekStart: 1,
+                                                                forceParse: true
+                                                            });
+                                                        </script>
+                                                    </div>
+                                                </div><!-- col-sm-6 -->
+                                            </div><!-- row -->
+
+                                            <div class="row">
+                                                <div class="col-sm-6">
+                                                    <div class="form-group no-margin-hr">
+                                                        <h:outputLabel styleClass="control-label text-sm text-slim"
+                                                                       value="#{applicationBean.productDescription}:" for="idProducto" />
+                                                        <h:selectOneMenu styleClass="form-control input-sm" disabled="#{casoController.selected.closed}" id="idProducto" 
+                                                                         value="#{casoController.selected.idProducto}" >
+                                                            <f:selectItems value="#{productoController.itemsAvailableSelectOne}"/>
+                                                            <p:ajax update="idComponente modeloProductoId"  listener="#{casoController.handleProductChange}" />
+                                                        </h:selectOneMenu>
+                                                    </div>
+                                                </div><!-- col-sm-6 -->
+                                                <div class="col-sm-6">
+                                                    <div class="form-group no-margin-hr">
+                                                        <h:outputLabel styleClass="control-label text-sm text-slim"
+                                                                       value="Modelo:" for="modeloProductoId" />
+                                                        <h:selectOneMenu styleClass="form-control input-sm" id="modeloProductoId" disabled="#{casoController.selected.closed}"
+                                                                         value="#{casoController.selected.idModelo}" >
+                                                            <f:selectItem itemLabel="" itemValue=""/>
+                                                            <f:selectItems value="#{casoController.selected.idProducto.modeloProductoList}" var="m" itemValue="#{m}" itemLabel="#{m.nombre}"/>
+                                                            <p:ajax update="idComponente"  listener="#{casoController.onProductoModeloChosen()}" />
+                                                        </h:selectOneMenu>
+                                                    </div>
+                                                </div><!-- col-sm-6 -->
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-sm-6">
+                                                    <div class="form-group no-margin-hr">
+                                                        <h:outputLabel styleClass="control-label text-sm text-slim"
+                                                                       value="#{applicationBean.productComponentDescription}:" 
+                                                                       for="idComponente" />
+                                                        <h:selectOneMenu styleClass="form-control input-sm" id="idComponente"  value="#{casoController.selected.idComponente}"
+                                                                         disabled="#{casoController.selected.closed or casoController.selected.idProducto eq null}">
+                                                            <f:selectItem itemLabel="" itemValue=""/>
+                                                            <f:selectItems value="#{casoController.selected.idProducto.componenteList}" var="comp" itemLabel="#{comp.nombre}" itemValue="#{comp}"/>
+                                                            <p:ajax update="idSubComponente"  listener="#{casoController.handleProductChange}" />  
+                                                        </h:selectOneMenu>
+                                                    </div>
+                                                </div><!-- col-sm-6 -->
+                                                <div class="col-sm-6">
+                                                    <div class="form-group no-margin-hr">
+                                                        <h:outputLabel styleClass="control-label text-sm text-slim"
+                                                                       value="#{applicationBean.productSubComponentDescription}:" for="idSubComponente" />
+                                                        <h:selectOneMenu styleClass="form-control input-sm" id="idSubComponente" value="#{casoController.selected.idSubComponente}"  
+                                                                         disabled="#{casoController.selected.closed or casoController.selected.idComponente eq null}">
+                                                            <f:selectItem itemLabel="" itemValue=""/>
+                                                            <f:selectItems value="#{casoController.selected.idComponente.subComponenteList}" var="subc" itemLabel="#{subc.nombre}" itemValue="#{subc}"/>
+                                                        </h:selectOneMenu>
+                                                    </div>
+                                                </div><!-- col-sm-6 -->
+                                            </div>
+                                            <ui:repeat id="tableCustomFields" var="customField" value="#{casoController.currentCasoCustomFieldList}">
+
+                                                <div class="row form-group">
+                                                    <label class="col-sm-12 control-label text-sm text-slim">
+                                                        <h:outputLabel value="#{customField.customField.label}:" for="customFieldI"/>
+                                                    </label>
+                                                    <div class="col-sm-12">
+                                                        <itcs2:customField id="customFieldI" casoCustomFieldValue="#{customField}" casoOpen="#{casoController.selected.isOpen()}"/>
+                                                    </div>
+                                                </div>
+                                            </ui:repeat>
+
+                                        </div>
+                                        <div class="panel-footer text-right">
+                                            <p:commandLink disabled="#{casoController.selected.closed or not (casoController.verificarGrabarCaso())}" 
+                                                           styleClass="btn btn-primary"
+                                                           ajax="false" update=":formint1" action="#{casoController.update}" >Guardar</p:commandLink>
+                                        </div>
+                                    </h:form>
+
+
+
+
+
+                                </div> <!-- / .collapse -->
+                            </div> <!-- / .panel -->
+
+
+
+                            <div class="panel">
+                                <div class="panel-heading">
+                                    <a class="accordion-toggle collapsed" data-toggle="collapse" data-parent="#accordion-example" href="#casosHijosList">
+                                        Sub casos (#{casoController.selected.casosHijosList.size()})
+                                    </a>
+                                </div> <!-- / .panel-heading -->
+                                <div id="casosHijosList" class="panel-collapse collapse">
+                                    <div class="panel-body">
+                                        <h:form id="formSubCasos" rendered="#{casoController.selected.casosHijosList.size() gt 0}">
+                                            <h:panelGrid columns="1">
+                                                <c:forEach items="#{casoController.selected.casosHijosList}" var="itemS" >
+                                                    <h:commandLink action="#{casoController.filterByIdCaso(itemS.idCaso)}">                                                        
+                                                        <h:outputText styleClass="label" 
+                                                                      style="background: \##{itemS.idSubEstado.backgroundColor}; color: \##{itemS.idSubEstado.fontColor};" value="#{itemS.idSubEstado.nombre}"/>
+                                                        <h:outputText value=" #{itemS.tipoCaso.nombre} N°#{itemS.idCaso} - #{itemS.tema}"/>
+                                                    </h:commandLink>
+                                                    <p:separator/>
+                                                </c:forEach>
+                                            </h:panelGrid>
+                                        </h:form>
+                                        <h:outputText value="No hay sub casos" rendered="#{casoController.selected.casosHijosList.size() le 0}"/>
+                                    </div> <!-- / .panel-body -->
+                                </div> <!-- / .collapse -->
+                            </div> <!-- / .panel -->
+
+                            <div class="panel">
+                                <div class="panel-heading">
+                                    <a class="accordion-toggle collapsed" data-toggle="collapse" data-parent="#accordion-example" href="#casosRelacionadosList">
+                                        Casos relacionados (#{casoController.selected.casosRelacionadosList.size()})
+                                    </a>
+                                </div> <!-- / .panel-heading -->
+                                <div id="casosRelacionadosList" class="panel-collapse collapse">
+                                    <div class="panel-body">
+                                        <h:form id="formCasosRel" rendered="#{casoController.selected.casosRelacionadosList.size() gt 0}">
+                                            <h:panelGrid columns="1">
+                                                <c:forEach items="#{casoController.selected.casosRelacionadosList}" var="item" >
+                                                    <h:commandLink action="#{casoController.filterByIdCaso(item.idCaso)}">                                                        
+                                                        <h:outputText styleClass="label" 
+                                                                      style="background: \##{item.idSubEstado.backgroundColor}; color: \##{item.idSubEstado.fontColor};" value="#{item.idSubEstado.nombre}"/>
+                                                        <h:outputText value=" #{item.tipoCaso.nombre} N°#{item.idCaso} - #{item.tema}"/>
+                                                    </h:commandLink>
+                                                    <p:separator/>
+                                                </c:forEach>
+                                            </h:panelGrid>
+                                        </h:form>
+                                        <h:outputText value="No hay casos relacionados" rendered="#{casoController.selected.casosRelacionadosList.size() le 0}"/>
+
+
+                                    </div> <!-- / .panel-body -->
+                                </div> <!-- / .collapse -->
+                            </div> <!-- / .panel -->
+
+
+                            <div class="panel">
+
+                                <div class="panel-heading">
+                                    <h:panelGroup id="tab-adjuntos-panel">
+                                        <a id="title-tab-adjuntos" class="accordion-toggle collapsed" data-toggle="collapse" data-parent="#accordion-example" href="#tab-adjuntos">
+                                            Archivos adjuntos (#{casoController.selected.cantidadAttachment})
+                                        </a>
+                                    </h:panelGroup>
+
+
+                                </div> <!-- / .panel-heading -->
+                                <div id="tab-adjuntos" class="panel-collapse collapse">
+
+
+                                    <h:form id="formlistaadjuntos">
+                                        <h:panelGroup id="listaadjuntos" layout="block" rendered="#{not empty casoController.selected.attachmentList}">
+
+
+                                            <ul class="list-group no-margin">
+
+                                                <ui:repeat var="fileitem" value="#{casoController.selected.attachmentList}" >
+                                                    <h:panelGroup rendered="#{fileitem.contentId eq null}">
+                                                        <li class="list-group-item no-border-hr padding-xs-hr">
+                                                            <h:outputText value="#{casoController.nombreArchivoParaDesplegar(fileitem.nombreArchivo)}" 
+                                                                          styleClass="text-semibold"
+                                                                          title="#{fileitem.nombreArchivo} (#{fileitem.readableFileSize})"/>     
+                                                            <div class="">
+                                                                &nbsp;&nbsp;
+                                                                <p:commandLink ajax="false" title="Bajar #{fileitem.nombreArchivo} (#{fileitem.readableFileSize})">
+                                                                    Bajar
+                                                                    <p:fileDownload contentDisposition="attachment" value="#{casoController.bajarArchivo(fileitem.idAttachment)}" />
+                                                                </p:commandLink>&nbsp;&nbsp;
+                                                                <p:commandLink value="Eliminar" title="Eliminar #{fileitem.nombreArchivo} (#{fileitem.readableFileSize})" 
+                                                                               onclick="borrarAttachment.show();"
+                                                                               disabled="#{not casoController.verificarGrabarCaso()}">
+                                                                    <f:setPropertyActionListener target="#{casoController.idFileDelete}" value="#{fileitem.idAttachment}"/>
+                                                                </p:commandLink>
+
+                                                                <p:lightBox iframe="true" rendered="#{fileitem.imageOrPDF}"> 
+                                                                    <h:outputLink  value="#{facesContext.externalContext.requestContextPath}/DownloadFileServlet?tenant=#{UserSessionBean.tenantId}&amp;id=#{fileitem.idAttachment}" 
+                                                                                   title="Preview">  
+                                                                        <h:outputText value="Ver" title="Previsualizar"/>
+                                                                    </h:outputLink>
+                                                                </p:lightBox>
+                                                            </div>
+
+
+                                                        </li>
+                                                    </h:panelGroup>
+
+                                                </ui:repeat>
+                                            </ul>
+
+
+                                        </h:panelGroup>
+
+
+                                        <p:fileUpload id="fileupload"
+                                                      sizeLimit="5242880"
+                                                      invalidSizeMessage="El archivo excede el tamaño maximo: 5MB."
+                                                      fileUploadListener="#{casoController.subir}"
+                                                      disabled="#{not casoController.verificarGrabarCaso()}"
+                                                      label="Adjuntar (seleccionar o arrastrar aquí) ..."
+                                                      uploadLabel="Subir"
+                                                      cancelLabel="Cancelar Subida"
+                                                      invalidFileMessage="Archivo Invalido." 
+                                                      mode="advanced"
+                                                      dragDropSupport="true"
+                                                      auto="true"
+                                                      update=":mainform:messages :formlistaadjuntos :tab-adjuntos-panel :message-details-reply:parchivos"
+                                                      multiple="true"  
+                                                      rendered="#{casoController.selected.open}"/>
+
+
+                                        <p:tooltip for=":formlistaadjuntos:fileupload" value="Sugerencia: Arrastre y suelte los archivos en esta área del caso para adjuntarlos."/>
+
+
+                                    </h:form>
+
+                                </div> <!-- / .collapse -->
+
+                            </div> <!-- / .panel -->
+
+
+
+
+
+                        </div>
+
+                        <div class="panel no-border panel-dark">
+                            <div class="panel-body text-center">
+                                <p class="text-lg text-slim">
+                                    Can't find the answer?
+                                </p>
+                                <div style="margin-top: 20px;">
+                                    <a href="#" class="btn btn-lg btn-primary btn-flat" data-toggle="modal" data-target="#modal-faq">Contact Us</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-sm-7 col-md-8 col-lg-9 col-sm-pull-5 col-md-pull-4 col-lg-pull-3 main">
+
+
+                        <h:form id="botoneraCaso">
+
+                            <div class="panel colourable">
+                                <div class="panel-heading">
+                                    <span class="panel-title">                                
+                                        #{casoController.selected.emailCliente.nombreOEmailCliente} escribió:    
+                                    </span>
+                                    <div class="panel-heading-controls">
+
+
+
+                                        <div class="btn-group btn-group-xs">
+                                            <h:commandLink title="Volver" action="inbox" styleClass="btn btn-xs btn-success btn-outline">
+                                                <i class="fa fa-chevron-left"></i>
+                                            </h:commandLink>
+
+                                            <h:commandLink title="#{bundle.EditCasoLabel_idCasoPadre}: #{casoController.selected.idCasoPadre.tipoCaso.nombre} N°#{casoController.selected.idCasoPadre.idCaso} - #{casoController.selected.idCasoPadre.tema}" 
+                                                           rendered="#{casoController.selected.idCasoPadre ne null}" 
+                                                           action="#{casoController.filterByIdCaso(casoController.selected.idCasoPadre.idCaso)}" styleClass="btn btn-xs btn-success btn-outline">
+                                                <i class="fa fa-level-up"></i>
+                                            </h:commandLink>
+
+                                            <h:commandLink title="Actualizar" 
+                                                           actionListener="#{casoController.refreshCaso()}" styleClass="btn btn-xs btn-success btn-outline">
+                                                <i class="fa fa-refresh"></i>
+                                            </h:commandLink>
+                                        </div>
+
+                                        <div class="btn-group btn-group-xs">
+                                            <p:commandLink rendered="#{casoController.verificarTomarCaso()}"
+                                                           styleClass="btn btn-xs btn-success btn-outline" type="button"
+                                                           ajax="true" title="Asignármelo" onclick="tomarCaso.show()" >
+                                                <i class="fa fa-inbox"></i>         
+                                            </p:commandLink>
+
+                                            <p:commandLink rendered="#{casoController.verificarReabrirCaso()}"
+                                                           styleClass="btn btn-xs btn-success btn-outline" 
+                                                           ajax="true" title="Reabrir Caso" onclick="openCase.show();" >
+                                                <i class="fa fa-folder-open-o"></i>         
+                                            </p:commandLink>
+                                        </div>
+
+                                        <div class="btn-group btn-group-xs">
+
+                                            <p:commandLink id="CatAsBtn" title="Categoría"            
+                                                           actionListener="#{casoController.actualizaArbolDeCategoria()}"
+                                                           styleClass="btn btn-xs btn-success btn-outline" oncomplete="CatPanel.loadContents()">
+                                                <i class="fa fa-folder"></i>
+                                            </p:commandLink>
+
+                                            <p:overlayPanel id="CatPanel" widgetVar="CatPanel" for="CatAsBtn" hideEffect="fade" dynamic="true">                                     
+
+                                                <p:tree id="arbol" value="#{categoriaController.categorias}" var="node" dynamic="true" cache="false"
+                                                        selectionMode="single" selection="#{categoriaController.categoria}"
+                                                        style="border-color: window;">
+                                                    <p:ajax event="select" listener="#{casoController.onNodeSelect}"
+                                                            update=":info-panel" oncomplete="CatPanel.hide()"/>
+                                                    <p:treeNode expandedIcon="myfoldericon16"
+                                                                collapsedIcon="myfoldericon16">
+                                                        <h:outputText value="#{node.nombre}" />
+                                                    </p:treeNode>
+                                                </p:tree>
+
+                                            </p:overlayPanel> 
+
+                                            <p:commandLink id="TagAsBtn" title="Etiquetas" 
+                                                           styleClass="btn btn-xs btn-success btn-outline" onclick="TagPanel.loadContents()">
+                                                <i class="fa fa-tags"></i>
+                                            </p:commandLink>
+
+                                            <p:overlayPanel id="TagPanel" widgetVar="TagPanel" for="TagAsBtn" hideEffect="fade" dynamic="true">                                     
+
+                                                <p:autoComplete id="tags" 
+                                                                value="#{casoController.selected.etiquetaStringList}" forceSelection="true" 
+                                                                completeMethod="#{applicationBean.findEtiquetasByPattern}" multiple="true">
+                                                    <p:ajax  event="itemSelect"  listener="#{casoController.tagItemSelectEvent}"  update=":botoneraCaso:etiquetasGroup"  />
+                                                    <p:ajax  event="itemUnselect"  listener="#{casoController.tagItemUnselectEvent}"  update=":botoneraCaso:etiquetasGroup"  />
+                                                </p:autoComplete>
+                                                <p:watermark for="tags" value="Etiquetas"/>
+
+                                            </p:overlayPanel>  
+
+                                            <p:commandLink id="TasksBtn" title="Tareas" styleClass="btn btn-xs btn-success btn-outline" onclick="TareasDialog.show()">
+                                                <i class="fa fa-tasks"></i>
+                                            </p:commandLink>
+
+
+
+                                        </div>
+
+                                        <div class="btn-group btn-group-xs">
+                                            <button type="button" class="btn btn-xs btn-success btn-outline dropdown-toggle" data-toggle="dropdown"><span class="fa fa-cog"></span>&nbsp;<i class="fa fa-caret-down"></i></button>
+
+                                            <ul class="dropdown-menu">
+                                                <li>
+                                                    <p:commandLink ajax="false" 
+                                                                   title="Copiar Caso" action="#{casoController.prepareCopy()}">
+                                                        <i class="fa fa-copy"></i> Copiar        
+                                                    </p:commandLink>
+                                                </li>
+                                                <li>
+                                                    <p:commandLink ajax="false" 
+                                                                   title="Copiar y Asignármelo" action="#{casoController.prepareCopyAndAssignMe()}">
+                                                        <i class="fa fa-copy"></i> Copiar y Asignármelo        
+                                                    </p:commandLink>
+                                                </li>
+                                                <li>
+                                                    <p:commandLink rendered="#{casoController.verificarTransferirCaso()}"
+                                                                   ajax="true" title="Transferir" onclick="transferir.show();">
+                                                        <i class="fa fa-users"></i> Transferir        
+                                                    </p:commandLink>
+                                                </li>
+                                                <li>
+                                                    <p:commandLink rendered="#{casoController.verificarCrearColaborativo()}"
+                                                                   ajax="false" title="Crear Caso Colaborativo" 
+                                                                   action="#{casoController.crearCasoColab(casoController.selected)}">
+                                                        <i class="fa fa-ambulance"></i> Crear Caso Colaborativo        
+                                                    </p:commandLink>
+                                                </li>
+                                                <li>
+                                                    <p:commandLink rendered="#{casoController.verificarAsignarCaso()}"
+                                                                   ajax="true" title="Asignar" onclick="transferir.show();">
+                                                        <i class="fa fa-users"></i> Asignar        
+                                                    </p:commandLink>
+                                                </li>
+                                                <li>
+                                                    <p:commandLink rendered="#{casoController.verificarRelacionarCaso()}"
+                                                                   ajax="true" title="Relacionar Caso" onclick="casosRela.show();">
+                                                        <i class="fa fa-random"></i> Relacionar a otro Caso        
+                                                    </p:commandLink>
+                                                </li>
+
+                                                <li>
+                                                    <p:commandLink rendered="#{casoController.verificarCerrarCaso()}"
+                                                                   ajax="true" title="Cerrar Caso" onclick="closeCase.show();">
+                                                        <i class="fa fa-stop"></i> Cerrar Caso      
+                                                    </p:commandLink>
+                                                </li>
+
+                                                <li class="divider"></li>
+                                                <li>
+                                                    <p:commandLink rendered="#{casoController.verificarEliminarCaso()}"
+                                                                   ajax="true" title="Eliminar Caso" onclick="destroyCase.show();">
+                                                        <i class="fa fa-trash-o"></i> Eliminar Caso
+                                                    </p:commandLink>
+                                                </li>
+
+
+                                            </ul>
+                                        </div>
+                                    </div> <!-- / .panel-heading-controls -->
+                                </div> <!-- / .panel-heading -->
+                                <div class="panel-body">
+
+
+                                    <div class="expandable">
+                                        <h:outputText 
+                                            value="#{casoController.selected.descripcionTxt}" 
+                                            escape="false"/>
+                                    </div>
+                                    <script>
+                                        $('div.expandable').expander({
+                                            slicePoint: 50,
+                                            widow: 2,
+                                            expandEffect: 'fadeIn',
+                                            expandSpeed: 250,
+                                            collapseEffect: 'fadeOut',
+                                            collapseSpeed: 200,
+                                            // allow the user to re-collapse the expanded text.
+                                            userCollapse: true,
+                                            expandText: '[ + ]', // default is 'read more'
+                                            userCollapseText: '[ - ]'  // default is 'read less'
+                                        });
+                                    </script>
+
+                                    <p:commandLink actionListener="#{casoController.prepareViewHtml(casoController.selected.descripcion)}" 
+                                                   styleClass="btn btn-flat btn-sm btn-labeled btn-default pull-right">
+                                        <span class="btn-label icon fa fa-external-link"></span>Ver mensaje original
+                                    </p:commandLink>
+
+
+
+
+
+
+                                </div>
+                            </div>
+
+                        </h:form>
+
+
+                        <h:panelGroup rendered="#{casoController.selected.open}" >
+                            <div class="widget-article-comments">
+                                <div class="comment">
+                                    <img src="#{facesContext.externalContext.requestContextPath}/resources/images/pixel-admin/avatar.png"  class="comment-avatar"/>
+                                    <div class="comment-body">
+                                        <div id="message-details-reply">
+                                            <h:form id="message-details-reply" 
+                                                    styleClass="comment-text no-padding no-border">
+
+                                                <h:panelGroup rendered="#{not casoController.replyMode}">
+
+                                                    <p:commandLink actionListener="#{casoController.enableReplyMode()}" update=":message-details-reply">
+                                                        <div class="panel" style="height: 60px;color: #999;">
+                                                            &nbsp;Click aquí para <strong>Responder</strong> o Agregar un <strong>Comentario</strong>
+                                                        </div>
+                                                    </p:commandLink>
+
+                                                </h:panelGroup>
+
+
+                                                <h:panelGroup rendered="#{casoController.replyMode}">
+
+
+
+
+                                                    <div class="panel colourable">
+                                                        <div class="panel-heading">
+                                                            <span class="panel-title">
+                                                                <strong>Responder</strong> o Agregar un <strong>Comentario</strong>
+                                                            </span>
+
+                                                            <div class="panel-heading-controls">
+                                                                <div class="btn-group btn-group-xs">
+                                                                    <h:selectOneMenu id="clipping" styleClass="form-control input-sm select2Input"
+                                                                                     value="#{casoController.selectedClipping}" >
+                                                                        <f:selectItems value="#{clippingController.itemsAvailableSelectMany}"/>
+                                                                        <p:ajax update=":message-details-reply" listener="#{casoController.handleClippingSelectChangeEvent()}" />
+                                                                    </h:selectOneMenu>
+                                                                    <script type="text/javascript">
+                                                                        $(".select2Input").select2({
+                                                                            placeholder: "Seleccionar respuesta rápida",
+                                                                            allowClear: true
+                                                                        });
+                                                                    </script>
+
+
+                                                                </div>
+
+                                                                <div class="btn-group btn-group-xs">
+                                                                    <h:selectBooleanCheckbox 
+                                                                        id="textoNotaVisibilidadPublica" styleClass="switcher"
+                                                                        value="#{casoController.textoNotaVisibilidadPublica}" />
+                                                                    <script type="text/javascript">
+                                                                        $('.switcher').switcher({
+                                                                            theme: 'square',
+                                                                            on_state_content: 'Público',
+                                                                            off_state_content: 'Privado'
+                                                                        });
+                                                                    </script>
+                                                                </div>
+                                                            </div>
+
+                                                        </div>
+                                                        <div class="panel-body">
+
+                                                            <pe:ckEditor id="textonota" value="#{casoController.textoNota}" language="es"
+                                                                         toolbar="#{applicationBean.ckEditorToolbar}"
+                                                                         width="100%" 
+                                                                         required="true" />
+                                                            <p:message for="textonota"/>
+
+                                                            <div style="margin-top: 10px;">
+
+                                                                <div class="row">
+
+
+
+
+                                                                    <div class="col-sm-3">
+                                                                        <div class="form-group no-margin-hr">
+                                                                            <h:outputLabel for="addHistory" value="Agregar historia a la respuesta" styleClass="col-sm-12 control-label text-sm text-slim"/>
+                                                                            <h:selectBooleanCheckbox id="addHistory" value="#{casoController.incluirHistoria}" />
+
+                                                                        </div>
+                                                                    </div><!-- col-sm-6 -->
+
+
+
+                                                                    <div class="col-sm-3">
+                                                                        <div class="form-group no-margin-hr">
+                                                                            <h:outputLabel styleClass="col-sm-12 control-label text-sm text-slim"
+                                                                                           value="#{bundle.EditCasoLabel_nextResponseDue}" for="nextResponseDue1" />
+
+                                                                            <h:inputText id="nextResponseDue1" styleClass="form-control form_datetime" 
+                                                                                         title="Next Follow Up Due" value="#{casoController.selected.nextResponseDue}" 
+                                                                                         required="true" requiredMessage="Favor ingrese un valor para el sla.">
+                                                                                <f:convertDateTime pattern="dd/MM/yyyy HH:mm" />
+                                                                            </h:inputText>
+
+                                                                            <p:message for="nextResponseDue1"/>
+
+                                                                            <script type="text/javascript">
+                                                                                $('.form_datetime').datetimepicker({
+                                                                                    language: 'es',
+                                                                                    format: 'dd/mm/yyyy hh:ii',
+                                                                                    viewformat: 'dd/mm/yyyy hh:ii',
+                                                                                    todayBtn: true,
+                                                                                    autoclose: true,
+                                                                                    todayHighlight: true,
+                                                                                    weekStart: 1,
+                                                                                    forceParse: true
+                                                                                });
+                                                                            </script>
+
+
+                                                                        </div>
+                                                                    </div><!-- col-sm-6 -->
+                                                                    <div class="col-sm-3">
+                                                                        <div class="form-group no-margin-hr">
+
+                                                                            <h:outputLabel 
+                                                                                styleClass="col-sm-12 control-label text-sm text-slim"
+                                                                                value="#{bundle.cambiarSubEstado}"  />
+                                                                            <h:selectOneMenu rendered="#{!casoController.selected.closed}" id="idSubEstadox" styleClass="form-control input-sm"
+                                                                                             value="#{casoController.selected.idSubEstado}" >
+                                                                                <f:selectItems value="#{casoController.itemsSubEstadoCasoAvailableSelectOneCasoAbierto}"/>
+                                                                            </h:selectOneMenu>
+
+                                                                            <h:selectOneMenu rendered="#{casoController.selected.closed}" id="idSubEstado2" styleClass="form-control input-sm"
+                                                                                             value="#{casoController.selected.idSubEstado}" >
+                                                                                <f:selectItems value="#{casoController.itemsSubEstadoCasoAvailableSelectOneCasoCerrado}"/>
+                                                                            </h:selectOneMenu>
+                                                                            <p:message for="idSubEstadox"/>
+                                                                        </div>
+                                                                    </div><!-- col-sm-6 -->
+
+
+
+                                                                    <div class="col-sm-12">
+                                                                        <div class="form-group no-margin-hr">
+
+                                                                            <h:panelGrid columns="2">
+
+                                                                                <h:selectBooleanCheckbox id="adjuntarArchivosARespuesta" value="#{casoController.adjuntarArchivosARespuesta}" 
+                                                                                                         disabled="#{casoController.selected.cantidadAttachment le 0}"
+                                                                                                         rendered="#{casoController.selected.cantidadAttachment gt 0}">
+                                                                                    <p:ajax update=":message-details-reply:parchivos" process="@this"/>  
+                                                                                </h:selectBooleanCheckbox>
+                                                                                <h:outputLabel for="adjuntarArchivosARespuesta" value="#{bundle.adjuntarArchivosARespuesta}" 
+                                                                                               rendered="#{casoController.selected.cantidadAttachment gt 0}" styleClass="control-label text-sm text-slim"/>
+                                                                            </h:panelGrid>
+
+                                                                            <p:panel id="parchivos" visible="#{casoController.adjuntarArchivosARespuesta}">
+                                                                                <h:panelGrid columns="2">
+                                                                                    <h:outputLabel for="listaadjuntosrespuesta" value="Seleccione adjuntos: " style="font-weight:bold"/>
+                                                                                    <p:selectManyCheckbox id="listaadjuntosrespuesta" value="#{casoController.selectedAttachmensForMail}" >
+                                                                                        <f:selectItems value="#{casoController.selected.attachmentsNotEmbedded}" var="item" 
+                                                                                                       itemLabel="#{item.nombreArchivo}" itemValue="#{item.idAttachment}" />
+                                                                                    </p:selectManyCheckbox>
+                                                                                </h:panelGrid>
+                                                                            </p:panel>
+                                                                        </div>
+                                                                    </div>
+
+
+
+
+                                                                </div><!-- row -->
+
+                                                            </div>
+
+                                                        </div>
+                                                        <div class="panel-footer">
+
+
+                                                            <p:commandLink action="#{casoController.disableReplyMode()}" styleClass="btn btn-default"
+                                                                           immediate="true" update=":message-details-reply">
+                                                                Cancelar
+                                                            </p:commandLink>
+
+                                                            <div class="btn-group dropup pull-right">
+
+
+                                                                <button type="button" class="btn btn-primary  dropdown-toggle" data-toggle="dropdown">Guardar&nbsp;<i class="fa fa-caret-up"></i></button>
+                                                                <ul class="dropdown-menu">
+                                                                    <li>
+                                                                        <p:commandLink actionListener="#{casoController.crearNota(false)}" 
+                                                                                       update=":mainform:messages :formint1 :info-panel :inputPanel:formact:actividades :message-details-reply">
+                                                                            <i class=""></i> Guardar comentario
+                                                                        </p:commandLink>
+                                                                    </li>
+                                                                    <li>
+                                                                        <p:commandLink actionListener="#{casoController.crearNota(true)}" 
+                                                                                       update=":mainform:messages :formint1 :info-panel :inputPanel:formact:actividades :message-details-reply">
+                                                                            <i class=""></i> Guardar comentario y notificar al cliente
+                                                                        </p:commandLink></li>
+                                                                    <li> 
+                                                                        <p:commandLink actionListener="#{casoController.responder()}" 
+                                                                                       update=":mainform:messages :formint1 :info-panel :inputPanel:formact:actividades :message-details-reply">
+                                                                            <i class=""></i> Enviar respuesta por correo
+                                                                        </p:commandLink>
+                                                                    </li>
+                                                                    <li class="divider"></li>
+                                                                    <li>  
+                                                                        <p:commandLink actionListener="#{casoController.descartarBorrador()}"
+                                                                                       update=":mainform:messages"
+                                                                                       rendered="#{casoController.selected.respuesta ne null}">
+                                                                            <i class=""></i> Descartar borrador
+                                                                        </p:commandLink>
+                                                                    </li>
+                                                                    <li> 
+                                                                        <p:commandLink actionListener="#{casoController.guardarBorrador()}"
+                                                                                       update=":mainform:messages">
+                                                                            <i class=""></i> Guardar borrador
+                                                                        </p:commandLink>
+                                                                    </li>
+                                                                </ul>
+
+                                                            </div>
+                                                        </div>
+
+
+
+
+                                                    </div>
+
+                                                </h:panelGroup>
+
+                                            </h:form>
+                                        </div>
+                                    </div> <!-- / .comment-body -->
+                                </div>
+                            </div>
+                        </h:panelGroup>
+
+                        <div class="panel no-border panel-dark">
+
+                            <p:tabView id="inputPanel" dynamic="true" cache="false"  activeIndex="#{casoController.activeIndexdescOrComment}">
+                                <p:ajax event="tabChange" listener="#{casoController.onChangeActiveIndexdescOrComment}" />
+
+
+
+                                <p:tab id="tab-actividades" title="Actividades" >
+
+                                    <h:form id="formact">
+
+                                        <h:outputText rendered="#{empty casoController.listaActividadesOrdenada}" value="No se registran actividades"/>
+
+                                        <h:panelGroup id="actividades">
+                                            <div class="widget-article-comments">
+                                                <ui:repeat value="#{casoController.listaActividadesOrdenada}" var="item" >
+
+                                                    <div class="comment #{item.tipoNota.idTipoNota eq 3 ? 'right':''}">
+                                                        #{item.tipoNota.idTipoNota}#{item.visible}
+                                                        <img src="#{facesContext.externalContext.requestContextPath}/resources/images/pixel-admin/avatar.png" 
+                                                             class="comment-avatar"/>
+                                                        <div class="comment-body">
+                                                            <div class="comment-text" style="#{item.visible ? 'background: #fff':'background: #fafafa'}">
+                                                                <div class="comment-heading">
+                                                                    <a href="" title="#{item.visible ? 'public':'private'}">
+                                                                        #{casoController.creaTituloDeNota(item)}</a>
+                                                                    <span>#{casoController.prettyDate(item.fechaCreacion)}</span>
+
+
+                                                                    <div class="btn-group btn-group-xs pull-right">
+                                                                        <p:commandLink actionListener="#{casoController.prepareEditNota(item.idNota)}"
+                                                                                       styleClass="btn btn-sm btn-outline #{item.visible?'btn-primary':''}"
+                                                                                       update=":formEditNota"
+                                                                                       onsuccess="Nota.show();" 
+                                                                                       rendered="#{casoController.notaEditable(item)}" >
+                                                                            <span class="btn-label icon fa fa-pencil-square-o"></span>
+                                                                        </p:commandLink>
+                                                                    </div>
+
+                                                                </div>
+
+                                                                <div class="expandable">
+                                                                    <h:outputText value="#{item.texto}" escape="false"/>
+                                                                </div>
+                                                                <script>
+                                                                    $('div.expandable').expander({
+                                                                        slicePoint: 50,
+                                                                        widow: 2,
+                                                                        expandEffect: 'fadeIn',
+                                                                        expandSpeed: 250,
+                                                                        collapseEffect: 'fadeOut',
+                                                                        collapseSpeed: 200,
+                                                                        // allow the user to re-collapse the expanded text.
+                                                                        userCollapse: true,
+                                                                        expandText: '[ + ]', // default is 'read more'
+                                                                        userCollapseText: '[ - ]'  // default is 'read less'
+                                                                    });
+                                                                </script>
+                                                            </div>
+                                                            <div class="comment-footer">
+                                                                <i class="text-muted text-sm">
+                                                                    <h:outputText value="#{item.fechaCreacion}" styleClass="pull-right">
+                                                                        <f:convertDateTime pattern="#{bundle.dateFormat2}" />
+                                                                    </h:outputText>  
+                                                                </i>
+                                                                <br/>
+
+                                                            </div>
+                                                        </div> <!-- / .message-body -->
+                                                    </div>  <!-- / .message -->
+
+                                                </ui:repeat>
+                                            </div>
+                                        </h:panelGroup>
+
+
+
+
+
+                                    </h:form>
+                                </p:tab>
+
+                                <p:tab id="tabAgendarEvento" title="Agenda" 
+                                       disabled="#{(not casoController.verificarCrearActividad()) and (not casoController.verificarResponderCaso())}">
+
+                                    <h:panelGroup id="panel">
+                                        <p:layout style="min-width:400px;min-height:1000px;">
+                                            <p:layoutUnit position="west" resizable="true" size="220" minSize="40" maxSize="300">
+                                                <h:form id="filterSchedule">
+                                                    <p:panelGrid columns="1">
+                                                        <p:row>
+                                                            <p:column>
+                                                                <h:outputLabel for="invitados" value="Invitados:" style="font-weight: bold;"/>
+                                                            </p:column>
+
+                                                            <p:column>
+                                                                <p:autoComplete id="invitados" value="#{casoScheduleController.selectedUserToAddInvited}" 
+                                                                                completeMethod="#{casoScheduleController.autoCompleteUsuario}"  
+                                                                                var="u"  itemValue="#{u}" itemLabel="#{u.capitalName}">  
+
+                                                                    <p:ajax  event="itemSelect"  listener="#{casoScheduleController.usuarioFilterItemSelectEvent}"  
+                                                                             update=":inputPanel:panel"  />
+
+                                                                    <f:facet name="itemtip">
+                                                                        <h:panelGrid  columns="2" cellpadding="5">  
+                                                                            <f:facet name="header">  
+                                                                                <h:outputText value="#{u.capitalName}" />  
+                                                                            </f:facet>  
+
+                                                                            <h:outputText value="Nombre: " />  
+                                                                            <h:outputText value="#{u.capitalName}" />  
+
+                                                                            <h:outputText value="Email: " />  
+                                                                            <h:outputText value="#{u.email}" /> 
+
+
+                                                                        </h:panelGrid>  
+                                                                    </f:facet>  
+
+                                                                </p:autoComplete>   
+                                                                <p:watermark for="invitados" value="Agregar filtro..."/>
+                                                            </p:column>
+                                                        </p:row>
+
+                                                        <p:row>
+                                                            <p:column>
+
+                                                            </p:column>
+
+                                                            <p:column>
+                                                                <p:panel>
+
+                                                                    <h:outputText value="agregar usuarios para filtrar" rendered="#{empty casoScheduleController.filtrosUsuario}"/>
+
+                                                                    <ui:repeat id="invitadosList" value="#{casoScheduleController.filtrosUsuario}" var="userFilter">
+                                                                        <h:panelGroup styleClass="label label-info">
+                                                                            <h:outputText   value="#{userFilter.capitalName} (#{userFilter.idUsuario})"/>
+                                                                            <p:commandLink update=":inputPanel:panel" 
+                                                                                           process="@form"
+                                                                                           style="border: none !important;"
+                                                                                           styleClass="btn btn-xs btn-danger btn-outline">
+                                                                                <i class="fa fa-times"></i>
+                                                                                <p:collector unique="true" value="#{userFilter}" 
+                                                                                             removeFrom="#{casoScheduleController.filtrosUsuario}"/>
+                                                                            </p:commandLink>
+                                                                        </h:panelGroup>&nbsp;
+
+                                                                    </ui:repeat>
+                                                                </p:panel>
+                                                                <p:message for="invitadosList"/>
+                                                            </p:column>
+                                                        </p:row>
+
+
+
+
+
+
+
+                                                        <p:row>
+                                                            <p:column>
+                                                                <h:outputLabel for="resources" value="RECURSOS:" style="font-weight: bold;"/>  
+                                                            </p:column>
+
+                                                            <p:column>
+                                                                <p:autoComplete id="resources" value="#{casoScheduleController.selectedResourceToAddInvited}" 
+                                                                                completeMethod="#{casoScheduleController.autoCompleteResource}"  
+                                                                                var="rr"  itemValue="#{rr}" itemLabel="#{rr.nombre}">  
+
+                                                                    <p:ajax  event="itemSelect"  listener="#{casoScheduleController.resourceFilterItemSelectEvent}" 
+                                                                             update=":inputPanel:panel"  />
+
+                                                                    <f:facet name="itemtip">
+                                                                        <h:panelGrid  columns="2" cellpadding="5">  
+                                                                            <f:facet name="header">  
+                                                                                <h:outputText value="#{rr.nombre}" />  
+                                                                            </f:facet>  
+
+                                                                            <h:outputText value="Nombre: " />  
+                                                                            <h:outputText value="#{rr.nombre}" />  
+
+                                                                            <h:outputText value="Tipo: " />  
+                                                                            <h:outputText value="#{rr.tipo}" /> 
+
+
+                                                                        </h:panelGrid>  
+                                                                    </f:facet>  
+
+                                                                </p:autoComplete>   
+                                                                <p:watermark for="resources" value="Agregar..."/>
+
+                                                                <p:message for="resources"/>
+                                                            </p:column>
+                                                        </p:row>
+
+                                                        <p:row>
+                                                            <p:column>
+
+                                                            </p:column>
+
+                                                            <p:column>
+                                                                <p:panel>
+
+                                                                    <h:outputText value="favor agregar filtros recursos" rendered="#{empty casoScheduleController.filtrosRecurso}"/>
+                                                                    <ui:repeat id="rList" value="#{casoScheduleController.filtrosRecurso}" var="rSelected">
+                                                                        <h:panelGroup styleClass="label label-info">
+                                                                            <h:outputText   value="#{rSelected.nombre}"/>
+                                                                            <p:commandLink update=":inputPanel:panel" 
+                                                                                           process="@form"
+                                                                                           style="border: none !important;"
+                                                                                           styleClass="btn btn-xs btn-danger btn-outline">
+                                                                                <i class="fa fa-times"></i>
+                                                                                <p:collector unique="true" value="#{rSelected}" 
+                                                                                             removeFrom="#{casoScheduleController.filtrosRecurso}"/>
+                                                                            </p:commandLink>
+                                                                        </h:panelGroup>&nbsp;
+
+                                                                    </ui:repeat>
+                                                                </p:panel>
+                                                                <p:message for="rList"/>   
+                                                            </p:column>
+                                                        </p:row>
+                                                    </p:panelGrid>
+                                                </h:form>
+
+                                            </p:layoutUnit>
+
+                                            <p:layoutUnit position="center">
+                                                <h:form id="formAgendarEvento">
+                                                    <p:schedule id="myschedule" value="#{casoScheduleController.lazyScheduleEventsModel}" 
+                                                                firstHour="8" widgetVar="myschedule" >
+                                                        <p:ajax event="dateSelect" listener="#{casoScheduleController.onDateSelect}" 
+                                                                update=":createEventForm:eventDetails" oncomplete="PF('createEventDialog').show()" />  
+                                                        <p:ajax event="eventSelect" listener="#{casoScheduleController.onEventSelect}" 
+                                                                update=":createEventForm:eventDetails" oncomplete="PF('createEventDialog').show()" />  
+
+                                                        <p:ajax event="eventMove" listener="#{casoScheduleController.onEventMove}" update=":mainform:messages" />  
+                                                        <p:ajax event="eventResize" listener="#{casoScheduleController.onEventResize}" update=":mainform:messages" /> 
+                                                    </p:schedule>
+                                                </h:form>
+                                            </p:layoutUnit>
+                                        </p:layout>
+                                    </h:panelGroup>
+
+
+
+                                </p:tab>  
+
+                                <p:tab id="tab-timeline" title="TimeLine">
+
+                                    <div class="panel no-border panel-dark">
+                                        <div class="timeline">
+                                            <!-- Timeline header -->
+                                            <ui:repeat value="#{casoController.auditLogsCurrentCase}" var="audit" >
+
+                                                <div class="tl-entry" >
+                                                    <div class="tl-time">
+                                                        <h:outputText value="#{casoController.prettyDate(audit.fecha)}"/>
+                                                    </div>
+                                                    <div class="tl-icon bg-info"><i class="fa fa-thumb-tack"></i></div>
+                                                    <div class="panel tl-body">
+                                                        #{(not empty audit.campo and not empty audit.oldValue) ? audit.campo.concat(' cambió de ').concat(audit.oldValue).concat(' a '):''}
+                                                        #{audit.newValue}
+
+                                                        <i class="text-muted text-sm">                                              
+                                                            <h:outputText value=" Realizado por: #{audit.idUser} "/>
+                                                            <h:outputText value="#{audit.fecha}">
+                                                                <f:convertDateTime pattern="#{bundle.dateFormat2}" />
+                                                            </h:outputText>  
+                                                        </i>
+                                                    </div> <!-- / .tl-body -->
+                                                </div> <!-- / .tl-entry -->
+
+                                            </ui:repeat>
+                                        </div> <!-- / .timeline -->
+                                    </div>
+
+
+
+
+                                </p:tab>  
+
+                            </p:tabView>  
+                        </div>
+
+
+
+
+
+
+                    </div>
+                </div>
+
+            </div>
+
+            <script type="text/javascript">
+                init.push(function() {
+                    // Open nav on mobile
+                    $('.mail-nav .navigation li.active a').click(function() {
+                        $('.mail-nav .navigation').toggleClass('open');
+                        return false;
+                    });
+
+                    // Fix navigation if main menu is fixed
+                    if ($('body').hasClass('main-menu-fixed')) {
+                        $('.mail-nav').addClass('fixed');
+                    }
+
+
+
+                })
+            </script>
+
+        </ui:define>
+
+        <ui:define name="dialogs">
+
+
+            <h:form id="tasksform">
+                <p:dialog header="Tareas" widgetVar="TareasDialog" modal="true" appendTo="@(body)">
+
+                    <div class="col-md-12">
+                        <!-- Javascript -->
+                        <script>
+                            init.push(function() {
+                                $('.widget-tasks .panel-body').pixelTasks().sortable({
+                                    axis: "y",
+                                    handle: ".task-sort-icon",
+                                    stop: function(event, ui) {
+                                        // IE doesn't register the blur when sorting
+                                        // so trigger focusout handlers to remove .ui-state-focus
+                                        ui.item.children(".task-sort-icon").triggerHandler("focusout");
+                                    }
+                                });
+                                $('#clear-completed-tasks').click(function() {
+                                    $('.widget-tasks .panel-body').pixelTasks('clearCompletedTasks');
+                                });
+                            });
+                        </script>
+                        <!-- / Javascript -->
+
+                        <div class="panel widget-tasks panel-dark-gray">
+                            <div class="panel-heading">
+                                <span class="panel-title"><i class="panel-title-icon fa fa-tasks"></i>Recent tasks</span>
+                                <div class="panel-heading-controls">
+                                    <button class="btn btn-xs btn-primary btn-outline dark" id="clear-completed-tasks"><i class="fa fa-eraser text-success"></i> Clear completed tasks</button>
+                                </div>
+                            </div> <!-- / .panel-heading -->
+                            <!-- Without vertical padding -->
+                            <div class="panel-body no-padding-vr">
+
+                                <div class="task">
+                                    <span class="label label-warning pull-right">High</span>
+                                    <div class="fa fa-arrows-v task-sort-icon"></div>
+                                    <div class="action-checkbox">
+                                        <label class="px-single"><input type="checkbox" name="" value="" class="px"/><span class="lbl"></span></label>
+                                    </div>
+                                    <a href="#" class="task-title">A very important task<span>1 hour left</span></a>
+                                </div> <!-- / .task -->
+
+                                <div class="task completed">
+                                    <span class="label label-warning pull-right">High</span>
+                                    <div class="fa fa-arrows-v task-sort-icon"></div>
+                                    <div class="action-checkbox">
+                                        <label class="px-single"><input type="checkbox" name="" value="" class="px" checked="checked"/><span class="lbl"></span></label>
+                                    </div>
+                                    <a href="#" class="task-title">A very important task<span>58 minutes left</span></a>
+                                </div> <!-- / .task -->
+
+                                <div class="task completed">
+                                    <div class="fa fa-arrows-v task-sort-icon"></div>
+                                    <div class="action-checkbox">
+                                        <label class="px-single"><input type="checkbox" name="" value="" class="px" checked="checked"/><span class="lbl"></span></label>
+                                    </div>
+                                    <a href="#" class="task-title">A regular task</a>
+                                </div> <!-- / .task -->
+
+                                <div class="task">
+                                    <div class="fa fa-arrows-v task-sort-icon"></div>
+                                    <div class="action-checkbox">
+                                        <label class="px-single"><input type="checkbox" name="" value="" class="px"/><span class="lbl"></span></label>
+                                    </div>
+                                    <a href="#" class="task-title">A regular task</a>
+                                </div> <!-- / .task -->
+
+                                <div class="task">
+                                    <div class="fa fa-arrows-v task-sort-icon"></div>
+                                    <div class="action-checkbox">
+                                        <label class="px-single"><input type="checkbox" name="" value="" class="px"/><span class="lbl"></span></label>
+                                    </div>
+                                    <a href="#" class="task-title">A regular task</a>
+                                </div> <!-- / .task -->
+
+                                <div class="task">
+                                    <span class="label pull-right">Low</span>
+                                    <div class="fa fa-arrows-v task-sort-icon"></div>
+                                    <div class="action-checkbox">
+                                        <label class="px-single"><input type="checkbox" name="" value="" class="px"/><span class="lbl"></span></label>
+                                    </div>
+                                    <a href="#" class="task-title">An unimportant task</a>
+                                </div> <!-- / .task -->
+
+                                <div class="task">
+                                    <span class="label pull-right">Low</span>
+                                    <div class="fa fa-arrows-v task-sort-icon"></div>
+                                    <div class="action-checkbox">
+                                        <label class="px-single"><input type="checkbox" name="" value="" class="px"/><span class="lbl"></span></label>
+                                    </div>
+                                    <a href="#" class="task-title">An unimportant task</a>
+                                </div> <!-- / .task -->
+
+                                <div class="task">
+                                    <div class="fa fa-arrows-v task-sort-icon"></div>
+                                    <div class="action-checkbox">
+                                        <label class="px-single"><input type="checkbox" name="" value="" class="px"/><span class="lbl"></span></label>
+                                    </div>
+                                    <a href="#" class="task-title">A regular task</a>
+                                </div> <!-- / .task -->
+
+                                <div class="task">
+                                    <span class="label pull-right">Low</span>
+                                    <div class="fa fa-arrows-v task-sort-icon"></div>
+                                    <div class="action-checkbox">
+                                        <label class="px-single"><input type="checkbox" name="" value="" class="px"/><span class="lbl"></span></label>
+                                    </div>
+                                    <a href="#" class="task-title">An unimportant task</a>
+                                </div> <!-- / .task -->
+                            </div> <!-- / .panel-body -->
+                        </div> <!-- / .panel -->
+                    </div>
+                    <!-- /13. $RECENT_TASKS -->
+
+                </p:dialog>
+            </h:form>
+
+            <p:dialog header="Asignarme el Caso" widgetVar="tomarCaso" modal="true" appendTo="@(body)">
+                <h:form>
+                    <h:outputLabel value="¿Está seguro de auto-asignarse el Caso y todos sus Sub-Casos?" /><br/>
+                    <div style="text-align: right">
+                        <p:commandButton value="Si"
+                                         actionListener="#{casoController.tomarCaso}" ajax="false" />
+                        <p:commandButton value="No" onclick="tomarCaso.hide()" type="button" />
+                    </div>
+                </h:form>
+            </p:dialog>
+
+
+
+            <p:dialog header="Confirmar Borrar Archivo" widgetVar="borrarAttachment" modal="true" appendTo="@(body)">
+                <h:form>
+                    <label id="textoEliminar" >¿Esta seguro de borrar el archivo?</label><br/>
+                    <br/>
+                    <div style="text-align: right">                       
+                        <p:commandButton value="Si" update=":mainform:messages :formlistaadjuntos :tab-adjuntos-panel :message-details-reply:parchivos"
+                                         actionListener="#{casoController.deleteAttachment(actionEvent)}" onclick="borrarAttachment.hide()"/>
+
+                        <p:commandButton value="No" onclick="borrarAttachment.hide()" type="button" immediate="true"/>
+                    </div>
+                </h:form>
+            </p:dialog>
+
+            <p:dialog header="Editar Comentario" widgetVar="Nota" modal="true" appendTo="@(body)">
+                <h:form id="formEditNota">
+                    <p:messages globalOnly="true"/>
+
+
+                    <div class="btn-group btn-group-xs">
+                        <h:selectBooleanCheckbox 
+                            id="textoNotaVisibilidadPublica" value="#{casoController.selectedNota.visible}" 
+                            styleClass="switcher"/>
+                        <script type="text/javascript">
+                            $('.switcher').switcher({
+                                theme: 'square',
+                                on_state_content: 'Público',
+                                off_state_content: 'Privado'
+                            });
+                        </script>
+                    </div>
+
+                    <pe:ckEditor value="#{casoController.selectedNota.texto}" required="true" language="es"
+                                 toolbar="#{applicationBean.ckEditorToolbar}"
+                                 width="100%"
+                                 id="textonota" height="210"/>
+
+                    <p:commandButton value="Guardar" ajax="true" 
+                                     update=":formint1 :formlistaadjuntos :inputPanel:formact" action="#{casoController.editNota(false)}"/>
+                    <p:commandButton value="Guardar y notificar al cliente" ajax="true" 
+                                     update=":formint1 :inputPanel:formact :formlistaadjuntos" action="#{casoController.editNota(true)}"/>
+                    <p:commandButton value="Cerrar" type="button"  onclick="Nota.hide()" immediate="true" />
+
+                </h:form>
+            </p:dialog>
+
+
+            <p:dialog header="Cerrar Caso" widgetVar="closeCase" modal="true" appendTo="@(body)" >
+                <h:form id="formCerrarCaso">
+
+                    <h:panelGrid columns="3">
+
+                        <h:outputLabel value="Tipo:"  rendered="#{casoController.selected.tipoCaso eq null}"/>
+                        <h:selectOneMenu styleClass="form-control input-sm" id="idTipoCaso" rendered="#{casoController.selected.tipoCaso eq null}"
+                                         required="true" requiredMessage="El tipo de caso es requerido."
+                                         converter="TipoCasoControllerConverter"
+                                         value="#{casoController.selected.tipoCaso}" >                                  
+                            <f:selectItems value="#{applicationBean.tipoCasoAvailableList}" var="tipo" itemLabel="#{tipo.nombre}" itemValue="#{tipo}" itemDescription="#{tipo.descripcion}"/>
+                            <p:ajax update="idSubEstado2"/>
+                        </h:selectOneMenu>
+                        <p:message for="idTipoCaso"/>
+
+                        <h:outputLabel for="idSubEstado2"  value="Seleccione causal de cierre del caso:" style="font-weight: bold;"/>
+                        <p:selectOneMenu id="idSubEstado2" value="#{casoController.selected.idSubEstado}" >
+                            <f:selectItems value="#{casoController.itemsSubEstadoCasoAvailableSelectOneCasoCerrado}" var="subEstad" itemDescription="#{subEstad.description}"/>
+                        </p:selectOneMenu>
+                        <p:message for="idSubEstado2" />                            
+
+                    </h:panelGrid>
+
+                    <h:outputLabel value="Nota: se cerrarán también los sub-casos (casos hijos del caso actual), si existen."/>
+
+                    <h:panelGrid columns="3">
+                        <p:commandButton value="Aceptar" ajax="false" update=":mainform:messages"
+                                         actionListener="#{casoController.cerrarCaso}"   />
+                        <p:commandButton value="Cancelar" ajax="true"  onclick="closeCase.hide()" immediate="true"  />
+                    </h:panelGrid>
+
+                </h:form>
+            </p:dialog>
+
+
+            <p:dialog header="Eliminar Caso" widgetVar="destroyCase" modal="true" appendTo="@(body)" >
+                <h:form id="formEliminarCaso">
+                    <h:outputLabel value="#{bundle.EliminarCaso}" />
+                    <br/><br/>
+                    <p:commandButton rendered="#{casoController.verificarEliminarCaso()}"
+                                     ajax="false" value="Eliminar Caso" action="#{casoController.destroy()}"/>
+                    <p:commandButton value="Cancelar" ajax="true"  onclick="destroyCase.hide()"   />
+                </h:form>
+            </p:dialog>
+
+            <p:dialog header="ReAbrir Caso" widgetVar="openCase" modal="true" appendTo="@(body)">
+                <h:form>
+                    <h:outputLabel value="#{bundle.ReabrirCaso}" />
+
+                    <br>
+                        <h:outputLabel value="#{bundle.EditCasoLabel_idSubEstado}" for="idSubEstadoreopen" />
+                        <p:selectOneMenu id="idSubEstadoreopen"  
+                                         filter="true" filterMatchMode="contains"
+                                         value="#{casoController.selected.idSubEstado}" >
+                            <f:selectItems value="#{casoController.itemsSubEstadoCasoAvailableSelectOneCasoAbierto}" var="subEstad" itemDescription="#{subEstad.description}"/>
+
+                        </p:selectOneMenu>
+                    </br>
+
+                    <p:commandButton value="Aceptar" ajax="false" update=":mainform:messages"
+                                     actionListener="#{casoController.reabrirCaso}"   />
+                    <p:commandButton value="Cancelar" type="button"  onclick="openCase.hide()"  immediate="true" />
+
+                </h:form>
+            </p:dialog>
+
+
+
+            <p:dialog header="Agregar Casos Relacionado" widgetVar="casosRela" modal="true" appendTo="@(body)" >
+                <h:form>
+                    <h:panelGrid columns="2">
+                        <h:outputLabel value="Id Caso relacionado:" for="idcasorel" style="font-weight: bold"/>
+                        <h:inputText value="${casoController.idCaserel}" id="idcasorel"/>
+                        <p:commandButton value="Agregar" ajax="true" update=":mainform:messages idcasorel"
+                                         actionListener="#{casoController.agregarRelacionado}"   />
+
+                        <p:commandButton value="Cancelar" type="button"  onclick="casosRela.hide()"  immediate="true" />
+                    </h:panelGrid>
+                </h:form>
+            </p:dialog>
+
+
+
+
+
+            <p:dialog header="Transferir Caso" widgetVar="transferir" modal="true" appendTo="@(body)" closeOnEscape="true">
+                <h:form id="transferForm">
+
+                    <p:panel id="panel-transferir">
+
+                        <p:messages />
+
+                        <!-- enable focus component -->
+                        <p:focus context="panel-transferir" />
+
+                        <p:panelGrid style="margin-bottom:10px;" styleClass="filtersGrid">
+                            <p:row>
+
+                                <p:column colspan="2">
+                                    <p:outputPanel id="tipoTransferPanel">  
+                                        <p:selectOneRadio id="tipoTransfer" value="#{casoController.tipoTransferOption}" layout="custom">  
+                                            <f:selectItem itemLabel="A otro Agente" itemValue="1" />  
+                                            <f:selectItem itemLabel="A otro Cliente" itemValue="2" />                          
+                                            <p:ajax update=":transferForm:tipoTransferPanel" listener="#{vistaController.handleAnyChangeEvent()}" /> 
+                                        </p:selectOneRadio>  
+
+
+
+                                        <h:panelGrid>
+
+                                            <h:panelGrid columns="3">
+                                                <p:radioButton id="idAgente" for="tipoTransfer" itemIndex="0"/>  
+                                                <h:outputLabel value="A otro Agente:" for="idAgente" style="font-weight: bold"/>
+                                                <p:selectOneMenu id="owner1" value="#{casoController.usuarioSeleccionadoTransfer}" filter="true" filterMatchMode="contains"
+                                                                 required="true" requiredMessage="Debe Seleccionar un agente si desea transferir el caso."
+                                                                 rendered="#{casoController.tipoTransferOption eq 1}">
+
+                                                    <f:selectItems value="#{usuarioController.itemsAvailableSelectOneNoSystem}"/>
+                                                </p:selectOneMenu>
+
+                                            </h:panelGrid>
+
+                                            <h:panelGrid columns="3">
+                                                <p:radioButton id="idCliente" for="tipoTransfer" itemIndex="1"/>  
+                                                <h:outputLabel value="A otro Cliente:" for="idCliente" style="font-weight: bold"/>
+                                                <p:autoComplete value="#{casoController.emailClienteSeleccionadoTransfer}"
+                                                                completeMethod="#{emailClienteController.completeEmailCliente}"  
+                                                                var="email" itemValue="#{email}" itemLabel="#{email.emailCliente}"
+                                                                required="true" requiredMessage="Debe Seleccionar un cliente si desea transferir el caso."
+                                                                rendered="#{casoController.tipoTransferOption eq 2}">  
+
+                                                    <f:facet name="itemtip">  
+                                                        <h:panelGrid  columns="2" cellpadding="5">  
+                                                            <f:facet name="header">  
+                                                                <h:outputText value="#{email.emailCliente}" />  
+                                                            </f:facet>  
+
+                                                            <h:outputText value="Nombre: " />  
+                                                            <h:outputText value="#{email.cliente.nombres}" />  
+
+                                                            <h:outputText value="Apellidos: " />  
+                                                            <h:outputText value="#{email.cliente.apellidos}" /> 
+
+                                                            <h:outputText value="Rut: " />  
+                                                            <h:outputText value="#{email.cliente.rut}" /> 
+                                                        </h:panelGrid>  
+                                                    </f:facet>  
+
+                                                </p:autoComplete>               
+
+
+
+                                            </h:panelGrid>
+
+
+                                        </h:panelGrid>  
+                                    </p:outputPanel>
+                                </p:column>
+                            </p:row>
+                            <p:row>
+                                <p:column colspan="3">
+                                    <h:outputLabel value="Motivo de transferencia: " for="owner1"  style="font-weight: bold"/>
+                                </p:column>
+                            </p:row>
+                            <p:row>
+                                <p:column colspan="3">
+                                    <p:inputTextarea id="transferNote" value="#{casoController.textoNota}" style="width: 100%;" required="true" requiredMessage="El Motivo de la transferencia o asignación es requerido."/>                              
+                                </p:column>
+                            </p:row>
+
+                        </p:panelGrid>
+
+                        <f:facet name="footer">
+                            <p:commandButton value="Transferir" update=":transferForm :inputPanel:formact :formint1" actionListener="#{casoController.asignarCaso}"  />
+
+                            <p:commandButton value="Cancelar" type="button"  onclick="transferir.hide()"  immediate="true" />
+                        </f:facet>
+                    </p:panel>
+
+
+
+                </h:form>
+            </p:dialog>
+
+
+            <p:dialog id="createEventDialog" widgetVar="createEventDialog" header="Evento" 
+                      showEffect="fade" hideEffect="fade" closeOnEscape="true" appendTo="@(body)">  
+                <h:form id="createEventForm">
+
+                    <p:scrollPanel style="width:550px;height:400px">
+                        <p:panelGrid id="eventDetails" columns="1" 
+                                     style="margin-bottom:10px;" styleClass="filtersGrid" >
+                            
+                                <p:messages globalOnly="true"/>
+
+                            <p:row>
+                                <p:column>
+                                    <h:outputLabel for="title" value="Titulo:" style="font-weight: bold;"/>  
+                                </p:column>
+
+                                <p:column>
+                                    <h:inputText id="title" value="#{casoScheduleController.event.title}" styleClass="form-control"
+                                                 required="true" requiredMessage="Favor ingrese un titulo para el evento."/> 
+                                    <p:message for="title"/>
+                                </p:column>
+                            </p:row>
+
+                            <p:row>
+
+                                <p:column>
+                                    <h:outputLabel value="Fecha:" style="font-weight: bold;"/>  
+                                </p:column>
+
+                                <p:column>
+                                    <p:panelGrid columns="6">
+                                        <h:outputLabel for="from" value="Desde:" style="font-weight: bold;"/>  
+                                        <p:inputMask id="from" value="#{casoScheduleController.event.startDate}" size="14"
+                                                     styleClass="form_datetime form_datetime"
+                                                     mask="99/99/9999 99:99" required="true" requiredMessage="Favor ingrese fecha y hora de comienzo.">  
+                                            <f:convertDateTime pattern="dd/MM/yyyy HH:mm" />  
+                                        </p:inputMask>  
+                                        <h:outputLabel for="to" value="Hasta:" style="font-weight: bold;"/>  
+                                        <p:inputMask id="to" value="#{casoScheduleController.event.endDate}" size="14"
+                                                     styleClass="form_datetime form_datetime"
+                                                     mask="99/99/9999 99:99" required="true" requiredMessage="Favor ingrese fecha y hora de término.">  
+                                            <f:convertDateTime pattern="dd/MM/yyyy HH:mm" />  
+                                        </p:inputMask>
+                                        <h:selectBooleanCheckbox id="allDay" value="#{casoScheduleController.event.allDay}"
+                                                                 label="Todo el dia"/>  
+                                        <h:outputLabel for="allDay" value="Todo el día" style="font-weight: bold;"/> 
+                                    </p:panelGrid>
+
+                                    <p:message for="from"/>
+                                    <p:message for="to"/>
+                                    <p:message for="allDay"/>
+
+
+                                </p:column>
+
+
+                            </p:row>
+
+
+                            <p:row>
+                                <p:column>
+                                    <h:outputLabel for="invitados" value="Usuarios:" style="font-weight: bold;"/>
+                                </p:column>
+
+                                <p:column>
+
+                                    <p:panelGrid columns="2">
+                                        <p:autoComplete id="invitados" value="#{casoScheduleController.selectedUserToAddInvited}" 
+                                                        completeMethod="#{casoScheduleController.autoCompleteUsuario}"  
+                                                        var="u"  itemValue="#{u}" itemLabel="#{u.capitalName}">  
+
+                                            <p:ajax  event="itemSelect"  process="@form"
+                                                     listener="#{casoScheduleController.usuarioInvitedItemSelectEvent}"  
+                                                     update=":createEventForm:eventDetails"  />
+
+                                            <f:facet name="itemtip">
+                                                <h:panelGrid  columns="2" cellpadding="5">  
+                                                    <f:facet name="header">  
+                                                        <h:outputText value="#{u.capitalName}" />  
+                                                    </f:facet>  
+
+                                                    <h:outputText value="Nombre: " />  
+                                                    <h:outputText value="#{u.capitalName}" />  
+
+                                                    <h:outputText value="Email: " />  
+                                                    <h:outputText value="#{u.email}" /> 
+
+
+                                                </h:panelGrid>  
+                                            </f:facet>  
+
+                                        </p:autoComplete> 
+
+                                        <p:panel>
+
+                                            <h:outputText value="favor agregar usuarios al evento" rendered="#{empty casoScheduleController.event.data.usuariosInvitedList}"/>
+
+                                            <ui:repeat id="invitadosList" value="#{casoScheduleController.event.data.usuariosInvitedList}" var="userSelected">
+                                                <h:panelGroup styleClass="label label-info">
+                                                    <h:outputText   value="#{userSelected.capitalName} (#{userSelected.idUsuario})"/>
+                                                    <p:commandLink update=":createEventForm:eventDetails" 
+                                                                   process="@form"
+                                                                   style="border: none !important;"
+                                                                   styleClass="btn btn-xs btn-danger btn-outline">
+                                                        <i class="fa fa-times"></i>
+                                                        <p:collector unique="true" value="#{userSelected}" 
+                                                                     removeFrom="#{casoScheduleController.event.data.usuariosInvitedList}"/>
+                                                    </p:commandLink>
+                                                </h:panelGroup>
+                                            </ui:repeat>
+
+                                        </p:panel>
+
+                                    </p:panelGrid>
+
+                                    <p:watermark for="invitados" value="Buscar usuario..."/>
+                                </p:column>
+                            </p:row>
+
+                            <p:row>
+                                <p:column>
+                                    <h:outputLabel for="resources" value="Recursos:" style="font-weight: bold;"/>  
+                                </p:column>
+
+                                <p:column>
+
+                                    <p:panelGrid columns="2">
+                                        <p:autoComplete id="resources" value="#{casoScheduleController.selectedResourceToAddInvited}" 
+                                                        completeMethod="#{casoScheduleController.autoCompleteResource}"  
+                                                        var="rr"  itemValue="#{rr}" itemLabel="#{rr.nombre}">  
+
+                                            <p:ajax  event="itemSelect" process="@form" listener="#{casoScheduleController.resourceInvitedItemSelectEvent}" 
+                                                     update=":createEventForm:eventDetails"  />
+
+                                            <f:facet name="itemtip">
+                                                <h:panelGrid  columns="2" cellpadding="5">  
+                                                    <f:facet name="header">  
+                                                        <h:outputText value="#{rr.nombre}" />  
+                                                    </f:facet>  
+
+                                                    <h:outputText value="Nombre: " />  
+                                                    <h:outputText value="#{rr.nombre}" />  
+
+                                                    <h:outputText value="Tipo: " />  
+                                                    <h:outputText value="#{rr.tipo}" /> 
+
+
+                                                </h:panelGrid>  
+                                            </f:facet>  
+
+                                        </p:autoComplete>   
+
+                                        <p:panel>
+
+                                            <h:outputText value="recursos" rendered="#{empty casoScheduleController.event.data.resourceList}"/>
+                                            <ui:repeat id="rList" value="#{casoScheduleController.event.data.resourceList}" var="rSelected">
+                                                <h:panelGroup styleClass="label label-info">
+                                                    <h:outputText   value="#{rSelected.nombre}"/>
+                                                    <p:commandLink update=":createEventForm:eventDetails" 
+                                                                   process="@form"
+                                                                   style="border: none !important;"
+                                                                   styleClass="btn btn-xs btn-danger btn-outline">
+                                                        <i class="fa fa-times"></i>
+                                                        <p:collector unique="true" value="#{rSelected}" 
+                                                                     removeFrom="#{casoScheduleController.event.data.resourceList}"/>
+                                                    </p:commandLink>
+                                                </h:panelGroup>&nbsp;
+
+                                            </ui:repeat>
+                                        </p:panel>
+                                    </p:panelGrid>
+                                    <p:watermark for="resources" value="Buscar recurso..."/>
+
+
+                                </p:column>
+                            </p:row>
+
+                            <p:row>
+                                <p:column>
+                                    <h:outputLabel for="recordatorios" value="Recordatorios:" style="font-weight: bold;"/>  
+                                </p:column>
+
+                                <p:column>
+                                    <p:panel>
+
+                                        <ui:repeat id="recordatorios" value="#{casoScheduleController.event.data.scheduleEventReminderList}" var="reminder" >
+
+                                            <h:panelGrid columns="4" cellpadding="5" cellspacing="5">
+                                                <h:selectOneMenu id="reminderType" 
+                                                                 value="#{reminder.reminderType}" 
+                                                                 required="true" requiredMessage="Se requiere ...">
+
+                                                    <f:selectItem itemLabel="Correo" itemValue="EMAIL"/>
+                                                    <f:selectItem itemLabel="Ventana emergente" itemValue="POPUP" itemDisabled="true"/>
+                                                </h:selectOneMenu>
+
+                                                <h:inputText id="quantityTime" value="#{reminder.quantityTime}" size="3" required="true" />
+
+                                                <h:selectOneMenu id="unitOfTimeInMinutes" 
+                                                                 value="#{reminder.unitOfTimeInMinutes}" 
+                                                                 required="true" requiredMessage="Se requiere ...">
+                                                    <f:selectItem itemLabel="minutos" itemValue="1"/>
+                                                    <f:selectItem itemLabel="horas" itemValue="60"/>
+                                                    <f:selectItem itemLabel="días" itemValue="1440"/>
+                                                    <f:selectItem itemLabel="semanas" itemValue="10080"/>
+                                                </h:selectOneMenu>
+
+                                                <p:commandLink update=":createEventForm:eventDetails" process="@this"
+                                                               styleClass="btn btn-xs btn-danger btn-outline"
+                                                               actionListener="#{casoScheduleController.removeScheduleEventReminder(reminder)}" >
+                                                    <i class="fa fa-times"></i>
+                                                </p:commandLink>
+
+                                            </h:panelGrid>
+
+
+                                        </ui:repeat>
+                                        <p:commandLink value="Agregar recordatorio" style="color: #006dcc"
+                                                       actionListener="#{casoScheduleController.addNewScheduleEventReminder()}" 
+                                                       update=":createEventForm:eventDetails"/>
+                                    </p:panel>
+
+                                </p:column>
+                            </p:row>
+
+
+
+
+
+
+                            <p:row>
+                                <p:column>
+
+                                </p:column>
+
+                                <p:column>
+                                    <h:panelGrid columns="2">
+                                        <h:selectBooleanCheckbox id="accionAutomaticaBool" value="#{casoScheduleController.event.data.executeAction}">
+                                            <p:ajax update=":createEventForm:eventDetails" process="@form"/>  
+                                        </h:selectBooleanCheckbox>
+                                        <h:outputLabel for="accionAutomaticaBool" value="Programar una acción automática" 
+                                                       title="Programar una tarea o acción que se ejecutará automáticamente cuando se cumpla la fecha del evento..."/>  
+                                    </h:panelGrid>
+
+                                    <p:message for="accionAutomaticaBool"/>
+                                </p:column>
+                            </p:row>
+
+
+
+
+
+                            <p:row rendered="#{casoScheduleController.event.data.executeAction}">
+                                <p:column>
+                                    <h:outputLabel id="labelTipoAccion" value="Acción:" for="idTipoAccion" style="font-weight: bold;" 
+                                                   />
+                                </p:column>
+
+                                <p:column>
+                                    <h:selectOneMenu id="idTipoAccion" styleClass="form-control"
+                                                     value="#{casoScheduleController.event.data.idTipoAccion}" 
+                                                     required="true" requiredMessage="Se requiere que seleccione el nombre de una clase que implemente la Accion."
+                                                     >
+                                        <p:ajax update=":createEventForm:eventDetails" />
+                                        <f:selectItems value="#{tipoAccionController.itemsAvailableSelectOneImplementingActionClass}"/>
+                                    </h:selectOneMenu>
+                                    <p:message for="idTipoAccion"/>
+                                </p:column>
+                            </p:row>
+
+
+
+
+                            <p:row rendered="#{casoScheduleController.event.data.executeAction}">
+                                <p:column>
+                                    <h:outputLabel id="labelidAccionCustom" value="Param:" for="idAccionCustom" style="font-weight: bold;" 
+                                                   />
+
+                                </p:column>
+
+                                <p:column>
+                                    <h:inputText id="idAccionCustom" value="#{casoScheduleController.event.data.parametrosAccion}"  styleClass="form-control"
+                                                 required="true" requiredMessage="Se requiere que ingrese parametros para la accion."
+                                                 title="#{bundle.CreateAccionLabel_parametros}"/>
+                                    <p:message for="idAccionCustom"/>
+                                </p:column>
+                            </p:row>
+
+
+
+
+                            <script type="text/javascript">
+                                $(".select2Multiple").select2({
+                                    dropdownAutoWidth: true,
+                                    allowClear: true
+                                });
+                                $('.form_datetime').datetimepicker({
+                                    language: 'es',
+                                    format: 'dd/mm/yyyy hh:ii',
+                                    viewformat: 'dd/mm/yyyy hh:ii',
+                                    todayBtn: true,
+                                    autoclose: true,
+                                    todayHighlight: true,
+                                    weekStart: 1,
+                                    forceParse: true
+                                });
+
+                            </script>
+
+                        </p:panelGrid>  
+                    </p:scrollPanel>
+
+
+
+
+                    <p:separator/>
+                    <p:commandButton type="reset" value="Reset" update=":createEventForm:eventDetails"/>  
+                    <p:commandButton id="addButton" value="Guardar" 
+                                     actionListener="#{casoScheduleController.addEvent()}"
+                                     update=":createEventForm:eventDetails" />  
+                </h:form>
+            </p:dialog> 
+
+
+
+
+
+        </ui:define>
+
+
+
+
+    </ui:composition>
+
+</html>

@@ -1,0 +1,239 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html [
+    <!ENTITY nbsp "&#160;"> 
+    ]>
+    <html xmlns="http://www.w3.org/1999/xhtml"
+          xmlns:ui="http://java.sun.com/jsf/facelets"    
+          xmlns:h="http://java.sun.com/jsf/html"
+          xmlns:f="http://java.sun.com/jsf/core"
+          xmlns:p="http://primefaces.org/ui">
+        <h:head>
+            <f:facet name="first">
+                <meta charset="utf-8"/>
+                <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+                <meta name="viewport" content="width=device-width, initial-scale=1"/>
+                <meta name="description" content=""/>
+                <meta name="author" content="ITCS"/>
+                <meta content='text/html; charset=UTF-8' http-equiv="Content-Type"/>
+                <title><ui:insert name="title">#{bundle.helpdeskTitle}</ui:insert></title>     
+            </f:facet>
+
+            <link href="http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,400,600,700,300&amp;subset=latin" rel="stylesheet" type="text/css"></link>
+            <!-- Pixel Admin's stylesheets -->
+
+            <link href="#{facesContext.externalContext.requestContextPath}/resources/stylesheets/bootstrap.min.css" rel="stylesheet" type="text/css"/>
+            <link href="#{facesContext.externalContext.requestContextPath}/resources/stylesheets/pixel-admin.min.css" rel="stylesheet" type="text/css"/>
+            <link href="#{facesContext.externalContext.requestContextPath}/resources/stylesheets/widgets.min.css" rel="stylesheet" type="text/css"/>
+            <link href="#{facesContext.externalContext.requestContextPath}/resources/stylesheets/pages.min.css" rel="stylesheet" type="text/css"/>
+            <link href="#{facesContext.externalContext.requestContextPath}/resources/stylesheets/themes.min.css" rel="stylesheet" type="text/css"/>
+
+            <style type="text/css">
+
+                #signup-demo {
+                    position: fixed;
+                    right: 0;
+                    bottom: 0;
+                    z-index: 10000;
+                    background: rgba(0,0,0,.6);
+                    padding: 6px;
+                    border-radius: 3px;
+                }
+                #signup-demo img { cursor: pointer; height: 40px; }
+                #signup-demo img:hover { opacity: .5; }
+                #signup-demo div {
+                    color: #fff;
+                    font-size: 10px;
+                    font-weight: 600;
+                    padding-bottom: 6px;
+                }
+            </style>
+
+        </h:head>
+
+        <h:body id="mainbody" styleClass="theme-default page-signup"> 
+
+            <!-- Page background -->
+            <div id="page-signup-bg">
+                <!-- Background overlay -->
+                <div class="overlay"></div>
+                <!-- Replace this with your bg image -->
+                <img src="assets/demo/signin-bg-1.jpg" alt=""/>
+            </div>
+            <!-- / Page background -->
+
+            <!-- Container -->
+            <div class="signup-container">
+                <!-- Header -->
+                <div class="signup-header">
+                    <a href="#" class="logo">
+                        ITCS Helpdesk - Signup
+                    </a> <!-- / .logo -->
+                    <div class="slogan">
+                        Simple. Flexible. Poderoso.
+                    </div> <!-- / .slogan -->
+                </div>
+                <!-- / Header -->
+
+                <!-- Form -->
+                <div class="signup-form">
+                    <h:form id="signup-form_id">
+
+                        <div class="signup-text">
+                            <span>Crea tu cuenta - pruébalo gratis</span>
+                        </div>
+
+                        <div class="form-group w-icon">
+                            <h:inputText id="signup_name" required="true" requiredMessage="REQUIRED"
+                                         styleClass="form-control input-lg" value="#{signUpController.name}" autocomplete="off"/>  
+                            <p:watermark for="signup_name" value="Nombre"/>
+                            <span class="fa fa-info signup-form-icon"></span>
+                        </div>
+
+                        <div class="form-group w-icon">
+                            <h:inputText id="signup_email" required="true" requiredMessage="REQUIRED" 
+                                         styleClass="form-control input-lg" value="#{signUpController.email}" autocomplete="off"/> 
+                            <p:watermark for="signup_email" value="E-Mail"/>
+                            <span class="fa fa-envelope signup-form-icon"></span>
+                        </div>
+
+                        <div class="form-group w-icon">
+                            <h:inputText id="signup_username" required="true" requiredMessage="REQUIRED"
+                                         styleClass="form-control input-lg" autocomplete="off"
+                                         value="#{signUpController.username}"/>  
+                            <p:watermark for="signup_username" value="Nombre de usuario"/>
+
+                            <span class="fa fa-user signup-form-icon"></span>
+                        </div>
+
+                        <div class="form-group w-icon">
+                            <h:inputSecret id="signup_password" required="true" requiredMessage="REQUIRED"
+                                           styleClass="form-control input-lg" autocomplete="off"
+                                           value="#{signUpController.password}"/>  
+                            <p:watermark for="signup_password" value="Contraseña"/>
+                            <span class="fa fa-lock signup-form-icon"></span>
+                        </div>
+                        
+                         <div class="form-group w-icon">
+                            <h:inputText id="companyName" required="true" requiredMessage="REQUIRED"
+                                         styleClass="form-control input-lg" autocomplete="off"
+                                         value="#{signUpController.companyName}"/>  
+                            <p:watermark for="companyName" value="Nombre de su compañia"/>
+
+                            <span class="fa fa-user signup-form-icon"></span>
+                        </div>
+                        
+
+                        <div class="form-group" style="margin-top: 20px;margin-bottom: 20px;">
+                            <label class="checkbox-inline">
+                                <input type="checkbox" name="signup_confirm" class="px" id="confirm_id"/>
+                                <span class="lbl">I agree with the <a href="#" target="_blank">Terms and Conditions</a></span>
+                            </label>
+                        </div>
+
+                        <div class="form-actions">
+                            <h:commandButton type="submit" action="#{signUpController.signup()}" styleClass="signup-btn bg-primary"
+                                 value="COMENZAR" />
+                              
+                        </div>
+
+                    </h:form>
+
+
+                    <!-- "Sign In with" block -->
+                    <div class="signup-with">
+                        <!-- Facebook -->
+                        <a href="index.html" class="signup-with-btn" style="background:#4f6faa;background:rgba(79, 111, 170, .8);">Sign Up with <span>Facebook</span></a>
+                    </div>
+                    <!-- / "Sign In with" block -->
+                </div>
+                <!-- Right side -->
+            </div>
+
+            <div class="have-account">
+                Already have an account? <a href="pages-signin.html">Sign In</a>
+            </div>
+
+
+            <script src="#{facesContext.externalContext.requestContextPath}/resources/javascripts/bootstrap.min.js"></script>
+
+            <script src="#{facesContext.externalContext.requestContextPath}/resources/javascripts/pixel-admin.min.js"></script>
+
+            <!-- Get jQuery from Google CDN -->
+            <!--[if !IE]> -->
+            <script type="text/javascript">
+                //<![CDATA[
+                window.jQuery || document.write('<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js">' + "<" + "/script>");
+                //]]>
+            </script>
+
+            <!-- <![endif]-->
+            <!--[if lte IE 9]>
+             <script type="text/javascript">
+                //<![CDATA[
+                window.jQuery || document.write('<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js">'+"<"+"/script>");
+                //]]>
+           </script>
+            <![endif]-->
+
+
+
+
+            <script type="text/javascript">
+                // Resize BG
+                //<![CDATA[
+                init.push(function() {
+                    var $ph = $('#page-signup-bg'),
+                            $img = $ph.find('> img');
+
+                    $(window).on('resize', function() {
+                        $img.attr('style', '');
+                        if ($img.height() < $ph.height()) {
+                            $img.css({
+                                height: '100%',
+                                width: 'auto'
+                            });
+                        }
+                    });
+
+                    $("#signup-form_id").validate({focusInvalid: true, errorPlacement:
+                                function() {
+                                }
+                    });
+
+                    // Validate name
+                    $("#name_id").rules("add", {
+                        required: true,
+                        minlength: 1
+                    });
+
+                    // Validate email
+                    $("#email_id").rules("add", {
+                        required: true,
+                        email: true
+                    });
+
+                    // Validate username
+                    $("#username_id").rules("add", {
+                        required: true,
+                        minlength: 3
+                    });
+
+                    // Validate password
+                    $("#password_id").rules("add", {
+                        required: true,
+                        minlength: 6
+                    });
+
+                    // Validate confirm checkbox
+                    $("#confirm_id").rules("add", {
+                        required: true
+                    });
+                });
+
+                window.PixelAdmin.start(init);
+                //]]>
+            </script>
+
+
+        </h:body>
+    </html>

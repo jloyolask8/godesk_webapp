@@ -1,0 +1,410 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:itcs="http://java.sun.com/jsf/composite/components/filterView"
+      xmlns:pe="http://primefaces.org/ui/extensions">
+
+    <ui:composition template="/script/template_inbox.xhtml">
+        <ui:define name="title">
+            <h:outputText value="Editar Regla de Negocio"></h:outputText>
+        </ui:define>
+        <ui:define name="west">
+
+        </ui:define>
+        <ui:define name="body">
+
+            <div class="page-header">
+                <h1><span class="text-light-gray">Reglas de Negocio / </span>Editar Regla #{reglaTriggerController.selected.idTrigger}</h1>
+            </div> <!-- / .page-header -->
+
+            <div class="row">
+                <div class="col-md-9">
+
+                    <h:form id="form" styleClass="panel panel-transparent form-horizontal">
+
+                        <p:messages id="messages" globalOnly="true"/>
+
+                        <div class="panel-body">
+                            
+                            <div class="row form-group">
+                                <label class="col-sm-3 control-label"><p:outputLabel value="Estado:" for="EstadoRegla" style="font-weight: bold;"/></label>
+                                <div class="col-sm-9">
+                                    <p:selectBooleanButton id="EstadoRegla" value="#{reglaTriggerController.selected.reglaActiva}" 
+                                                           onLabel="Activa" offLabel="Desactivada" onIcon="ui-icon-check" offIcon="ui-icon-close"/> 
+
+                                    <p:message for="EstadoRegla"/>
+                                </div>
+                            </div>
+                            <div class="row form-group">
+                                <label class="col-sm-3 control-label">  <p:outputLabel value="Áreas:" for="idArea" style="font-weight: bold;"/></label>
+                                <div class="col-sm-9">
+                                    <p:selectCheckboxMenu id="idArea"  value="#{reglaTriggerController.selected.areaList}" label="Seleccione areas..."
+                                                          style="width: 100%;"
+                                                          filter="true" filterMatchMode="contains" converter="AreaConverter"
+                                                          required="true" requiredMessage="Seleccione al menos un Area a la cual esta asociada esta regla.">
+                                        <f:selectItems value="#{areaController.itemsAvailableForSelect}" var="a" itemLabel="#{a.nombre}" itemValue="#{a}" />
+                                    </p:selectCheckboxMenu>
+                                    <p:message for="idArea"/>
+                                </div>
+                            </div>
+                            <div class="row form-group">
+                                <label class="col-sm-3 control-label">  <p:outputLabel value="Orden: " for="orden" style="font-weight: bold;"/></label>
+                                <div class="col-sm-9">
+
+                                    <script>
+
+                                        $(function() {
+                                            $(".ui-spinner-input").spinner();
+                                        });
+
+                                    </script>
+
+                                    <h:inputText id="orden" styleClass="form-control ui-spinner-input"
+                                                 value="#{reglaTriggerController.selected.orden}" 
+                                                 required="true" 
+                                                 requiredMessage="Favor ingrese un Orden de ejecución"
+                                                 />
+
+
+                                    <p:message for="orden"/>
+                                </div>
+                            </div>
+                            <div class="row form-group">
+                                <label class="col-sm-3 control-label"> <p:outputLabel value="Ejecutar Cuando: " for="eventoid" style="font-weight: bold;"/></label>
+                                <div class="col-sm-9">
+                                    <h:selectOneMenu id="eventoid"  styleClass="form-control"
+                                                     rendered="#{reglaTriggerController.selected ne null}"  
+                                                     value="#{reglaTriggerController.selected.evento}" 
+                                                     required="true" requiredMessage="Seleccione el Evento al cual esta asociada esta regla.">
+                                        <f:selectItem itemLabel="Se Cree un nuevo caso" itemValue="CREATE"/>
+                                        <f:selectItem itemLabel="Se Modifique un caso" itemValue="UPDATE"/>
+                                    </h:selectOneMenu>
+
+                                    <p:message for="idArea"/>
+                                </div>
+                            </div>
+                            
+                             <div class="row form-group">
+                                <label class="col-sm-3 control-label">  <p:outputLabel value="#{bundle.CreateReglaTriggerLabel_desccripcion}" for="descripcion" style="font-weight: bold;"/>  </label>
+                                <div class="col-sm-9">
+                                    <h:inputTextarea id="descripcion" styleClass="form-control"
+                                                     value="#{reglaTriggerController.selected.desccripcion}" 
+                                                     title="#{bundle.CreateReglaTriggerTitle_desccripcion}" />
+                                    <p:message for="orden"/>
+                                </div>
+                            </div>
+                            
+                            <hr class="panel-wide"></hr>
+                            <h6 class="text-light-gray text-semibold text-xs" style="margin:20px 0 10px 0;">Condiciones</h6>
+                            
+                            <div class="row">
+                                <label class="col-sm-3 control-label"><p:outputLabel value="Condiciones:" style="font-weight: bold;"/></label>
+                                <div class="col-sm-9">
+                                    <p:outputLabel value="Todas las siguientes condiciones se cumplan " />
+                                    <itcs:filterView id="panelFilter0" controllerMBean="#{reglaTriggerController}" 
+                                                     filterHelper="#{reglaTriggerController.filterHelper2}" showApplyAction="false"
+                                                     parentId=":form:panelFilter0"
+                                                     update=":mainform:messages :form"/>
+                                </div>
+                            </div>
+                            
+                             <hr class="panel-wide"></hr>
+                            <h6 class="text-light-gray text-semibold text-xs" style="margin:20px 0 10px 0;">Acciones</h6>
+
+                            <div class="row">
+                                <label class="col-sm-3 control-label"><p:outputLabel value="Acciones:" style="font-weight: bold;"/></label>
+                                <div class="col-sm-9">
+                                    <p:outputPanel id="acciones">
+                                        <p:dataTable value="#{reglaTriggerController.acciones}" 
+                                                     emptyMessage="Agregue al menos una acción a realizar."
+                                                     var="accion" id="accionesTable">
+                                            <p:column>
+                                                <f:facet name="header">
+                                                    <h:outputText value="Acción" />
+                                                </f:facet>
+                                                <h:outputText id="tipoAccionx" value="#{accion.idTipoAccion.nombre}" />
+                                                <p:tooltip for="tipoAccionx" value="Parametro(s): #{accion.parametros}" style="width: 550px;"/>
+                                            </p:column>
+                                            <p:column>
+                                                <f:facet name="header">
+                                                    <p:commandButton value="Agregar" onclick="addAccionPopup.show();" type="button"/>
+                                                </f:facet>
+                                                <p:commandLink value="Remover" update=":form:acciones :form:messages" process=":form:acciones">
+                                                    <p:collector value="#{accion}" removeFrom="#{reglaTriggerController.acciones}" unique="true"/>
+                                                </p:commandLink>
+                                            </p:column>
+
+                                            <f:facet name="header">
+                                                <h:outputText value="Acciones"/>
+                                            </f:facet>
+
+                                            <f:facet name="footer">
+                                                <h:outputText value="* Estas acciones se realizarán al cumplirse TODAS las condiciones de la Regla."/>
+                                            </f:facet>
+
+                                        </p:dataTable>
+                                    </p:outputPanel>
+                                </div>
+                            </div>
+
+                           
+
+
+
+                        </div>
+                        <div class="panel-footer text-right">
+
+                            <p:commandLink action="#{reglaTriggerController.prepareList}" value="Volver a las Reglas" styleClass="btn btn-default"
+                                           immediate="true" ajax="false">
+                                <i class=""></i>Volver
+                            </p:commandLink>
+                            &nbsp;
+                            <p:commandLink action="#{reglaTriggerController.update}" styleClass="btn btn-primary"
+                                           value="#{bundle.CreateAreaSaveLink}" ajax="false">
+                                <i class=""></i> #{bundle.CreateAreaSaveLink}
+                            </p:commandLink>    
+
+
+
+                        </div>
+                    </h:form> 
+
+
+
+                </div>
+
+                <script>
+                    init.push(function() {
+                        $('#dashboard-support-tickets .panel-body > div').slimScroll({height: 300, alwaysVisible: true, color: '#888', allowPageScroll: true});
+                    })
+                </script>
+
+                <div class="col-md-3">
+                    <div class="panel panel-success widget-support-tickets" id="dashboard-support-tickets">
+                        <div class="panel-heading">
+                            <span class="panel-title"><i class="panel-title-icon fa fa-bullhorn"></i>Ayuda</span>
+                            <div class="panel-heading-controls">
+                                <div class="panel-heading-text"></div>
+                            </div>
+                        </div> <!-- / .panel-heading -->
+                        <div class="panel-body tab-content-padding">
+                            <!-- Panel padding, without vertical padding -->
+                            <div class="slimScrollDiv" style="position: relative; overflow: hidden; width: auto; height: 300px;">
+                                <div class="panel-padding no-padding-vr" style="overflow: hidden; width: auto; height: 300px;">
+
+                                    <div>
+                                        <h:outputLabel escape="false" value="#{bundle.ayudaReglas}"/>
+                                        <br/>
+                                        <h:outputLabel value="Ordering triggers" style="font-weight: bold"/>
+                                        <h:outputLabel value="When a ticket is created or updated, Itcs helpdesk runs through all the triggers in order. 
+                                                       So it's important to make sure your triggers are in the right order.                                   
+                                                       New triggers are added to the bottom of the triggers list. "/>
+                                    </div>
+
+                                </div>
+                                <div class="slimScrollBar" style="background-color: rgb(136, 136, 136); width: 7px; position: absolute; top: 76px; opacity: 0.4; display: block; border-top-left-radius: 7px; border-top-right-radius: 7px; border-bottom-right-radius: 7px; border-bottom-left-radius: 7px; z-index: 99; right: 1px; height: 93.55509355509356px; background-position: initial initial; background-repeat: initial initial;"></div>
+                                <div class="slimScrollRail" style="width: 7px; height: 100%; position: absolute; top: 0px; display: none; border-top-left-radius: 7px; border-top-right-radius: 7px; border-bottom-right-radius: 7px; border-bottom-left-radius: 7px; background-color: rgb(51, 51, 51); opacity: 0.2; z-index: 90; right: 1px; background-position: initial initial; background-repeat: initial initial;"></div>
+
+                            </div>
+                        </div> <!-- / .panel-body -->
+                    </div> <!-- / .panel -->
+                </div>
+
+
+
+            </div>
+
+
+        </ui:define>
+        <ui:define name="dialogs">
+
+            <p:dialog id="modalDialogAcciones" header="+ Acción" widgetVar="addAccionPopup" modal="true" appendTo="@(body)" >
+
+                <div class="row">
+                    <div class="col-md-12">
+
+                        <h:form id="accionForm" styleClass="panel panel-transparent form-horizontal">
+
+                            <p:messages id="messages" />
+
+                            <div class="panel-body">
+                                <div class="row form-group">
+                                    <label class="col-sm-3 control-label"><p:outputLabel value="Acción:" for="idTipoAccion" style="font-weight: bold;"/></label>
+                                    <div class="col-sm-9">
+                                        <h:selectOneMenu id="idTipoAccion" styleClass="form-control"
+                                                         value="#{reglaTriggerController.accionTemp.idTipoAccion}" 
+                                                         required="true">
+                                            <p:ajax update=":accionForm" listener="#{reglaTriggerController.resetTempVars()}"/>
+                                            <f:selectItems value="#{tipoAccionController.itemsAvailableSelectOne}"/>
+                                        </h:selectOneMenu>
+                                        <p:message for="idTipoAccion"/>
+                                    </div>
+                                </div>
+                                <div class="row form-group">
+                                    <label class="col-sm-3 control-label">
+                                        <p:outputLabel value="#{bundle.CreateAccionLabel_parametros}" rendered="#{reglaTriggerController.esAccionAsignarAGrupo() or
+                                                                reglaTriggerController.esAccionAsignarAUsuario() or reglaTriggerController.esAccionCambiarPrioridad() or
+                                                                reglaTriggerController.esAccionEnviarEmail() or reglaTriggerController.esAccionCambioCat()}" style="font-weight: bold;"/>
+                                    </label>
+                                    <div class="col-sm-9">
+
+
+                                        <h:selectOneMenu id="idAreaSelect" styleClass="form-control"
+                                                         value="#{reglaTriggerController.accionParametroArea}"
+                                                         converter="AreaConverter"
+                                                         required="true" requiredMessage="Debe Seleccionar un Area."
+                                                         rendered="#{reglaTriggerController.esAccionAsignarArea()}">
+                                            <f:selectItems value="#{areaController.itemsAvailableSelectMany}"/>
+                                        </h:selectOneMenu>
+
+
+                                        <h:selectOneMenu styleClass="form-control" value="#{reglaTriggerController.customFieldKeyDates}" 
+                                                         rendered="#{reglaTriggerController.esAccionScheduleAction()}">      
+                                            <f:selectItem itemLabel="Fecha de Vencimiento (SLA)" itemValue="nextResponseDue"/>
+                                            <f:selectItem itemLabel="Fecha de Creación" itemValue="fechaCreacion"/>
+                                            <f:selectItem itemLabel="Fecha de Cierre" itemValue="fechaCierre"/>
+                                            <f:selectItem itemLabel="Fecha de Respuesta" itemValue="fechaRespuesta"/>
+                                            <f:selectItems value="#{reglaTriggerController.customFieldDateItemsAvailable}"/>
+                                        </h:selectOneMenu>
+
+                                        <h:inputText id="idAccionCustom" styleClass="form-control"
+                                                     value="#{reglaTriggerController.accionTemp.parametros}" 
+                                                     required="true" requiredMessage="Se requiere que ingrese una clase que implemente la Accion."
+                                                     title="Class full name"
+                                                     rendered="#{reglaTriggerController.esAccionCustom() or reglaTriggerController.esAccionScheduleAction()}">
+                                        </h:inputText>
+
+                                        <h:selectOneMenu styleClass="form-control" value="#{reglaTriggerController.accionParametroGrupo}" 
+                                                         rendered="#{reglaTriggerController.esAccionAsignarAGrupo()}">
+                                            <p:ajax update=":accionForm"/>
+                                            <f:selectItems value="#{grupoController.itemsAvailableSelectOne}"/>
+                                        </h:selectOneMenu>
+
+                                        <h:selectOneMenu styleClass="form-control" value="#{reglaTriggerController.accionParametroUsuario}" 
+                                                         rendered="#{reglaTriggerController.esAccionAsignarAUsuario()}">
+                                            <p:ajax update=":accionForm"/>
+                                            <f:selectItems value="#{usuarioController.itemsAvailableSelectOneNoSystem}"/>
+                                        </h:selectOneMenu>
+
+                                        <h:selectOneMenu styleClass="form-control" value="#{reglaTriggerController.accionParametroPrioridad}" 
+                                                         rendered="#{reglaTriggerController.esAccionCambiarPrioridad()}">
+                                            <p:ajax update=":accionForm"/>
+                                            <f:selectItems value="#{prioridadController.itemsAvailableSelectOne}"/>
+                                        </h:selectOneMenu>
+
+                                        <p:commandButton rendered="#{reglaTriggerController.esAccionEnviarEmail()}" update=":accionForm :formrespuesta"
+                                                         value="Componer email" action="#{reglaTriggerController.crearEmailTemp()}"
+                                                         oncomplete="#{p:widgetVar('mailcomposer')}.show()"/>
+
+                                        <h:inputText styleClass="form-control" value="#{reglaTriggerController.accionTemp.parametros}" id="idAccionCat" required="true" requiredMessage="Se requiere un parametro"
+                                                     title="#{bundle.CreateAccionLabel_parametros}"
+                                                     rendered="#{reglaTriggerController.esAccionCambioCat()}">
+                                            <p:ajax event="click" listener="#{casoController.actualizaArbolDeCategoria}" update=":formArbol:arbol" oncomplete="#{p:widgetVar('idDialogArbol')}.show()"/>
+                                        </h:inputText>
+                                        <p:message for="idAccionCat" rendered="#{reglaTriggerController.esAccionCambioCat()}"/>
+
+
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="panel-footer text-right">
+                                <p:commandLink ajax="true" onclick="addAccionPopup.hide()"  styleClass="btn btn-default" >
+                                    <i class=""></i>Cerrar
+                                </p:commandLink>
+                                &nbsp;
+                                <p:commandLink id="btn_add" styleClass="btn btn-primary"
+                                               update=":form:acciones :accionForm :form:messages" 
+                                               action="#{reglaTriggerController.prepareCreateAccion()}" ajax="true" >
+                                    <i class=""></i>Agregar
+                                </p:commandLink>
+                            </div>
+                        </h:form>
+                    </div>
+                </div>
+            </p:dialog>
+
+
+            <p:dialog id="idDialogArbol" header="Seleccione area" widgetVar="selCat" modal="true" appendTo="@(body)" width="400" height="300">
+                <h:form id="formArbol">
+                    <div align="left">
+                        <p:tree id="arbol" value="#{categoriaController.categorias}" var="node" dynamic="true" cache="false"
+                                selectionMode="single" selection="#{reglaTriggerController.catNodeSelected}"
+                                style="border-color: window;">
+                            <p:ajax event="select" update=":accionForm" oncomplete="selCat.hide()"/>
+                            <p:treeNode expandedIcon="myfoldericon16"
+                                        collapsedIcon="myfoldericon16">
+                                <h:outputText value="#{node.nombre}" />
+                            </p:treeNode>
+                        </p:tree>
+                    </div>
+                </h:form>
+            </p:dialog>
+            <p:dialog id="mailcomposer" header="Componer Email" widgetVar="mailComposerWidget" modal="true" appendTo="@(body)" >
+
+                <div class="row">
+
+                        <h:form id="formrespuesta" styleClass="panel panel-transparent form-horizontal" >
+
+                            <p:messages id="messages" globalOnly="true"/>
+
+                            <div class="panel-body">
+                                <div class="row form-group">
+                                    <label class="col-sm-3 control-label"><p:outputLabel value="Para:" for="emailCliente2" style="font-weight: bold;"/></label>
+                                    <div class="col-sm-5">
+                                        <h:inputText id="emailCliente2" styleClass="form-control"
+                                                     required="true" requiredMessage="El email del destinatario es requerido"
+                                                     value="#{reglaTriggerController.emailTemp.toAdress}" title="email destino" />
+                                        <p:message for="emailCliente2"/>
+                                    </div>
+                                </div>
+                                <div class="row form-group">
+                                    <label class="col-sm-3 control-label"><p:outputLabel value="Asunto:" for="emailSubject" style="font-weight: bold;"/></label>
+                                    <div class="col-sm-5">
+
+                                        <p:inputText id="emailSubject" styleClass="form-control"
+                                                     required="true" requiredMessage="El asunto del correo es requerido"
+                                                     value="#{reglaTriggerController.emailTemp.subject}" title="asunto"/>
+                                        <p:message for="emailSubject"/>
+                                    </div>
+                                </div>
+                                <div class="row form-group">
+                                    <label class="col-sm-3 control-label"><p:outputLabel value="Mensaje:" for="respuesta" style="font-weight: bold;"/></label>
+                                    <div class="col-sm-5">
+                                        <pe:ckEditor value="#{reglaTriggerController.emailTemp.body}"
+                                                      toolbar="#{applicationBean.ckEditorToolbar}"
+                                                     width="100%"
+                                                     required="true"
+                                                     id="respuesta" />
+
+                                        <p:message for="respuesta"/>
+                                    </div>
+                                </div>
+
+                            </div>
+                            <div class="panel-footer text-right">
+
+                                <p:commandLink ajax="true" onclick="mailComposerWidget.hide()"   styleClass="btn btn-default">
+                                    <i class=""></i>Volver
+                                </p:commandLink>
+                                &nbsp;
+                                <p:commandLink id="btn_add_action" styleClass="btn btn-primary"                                                
+                                               update=":formrespuesta" 
+                                               action="#{reglaTriggerController.prepareCreateAccionEmail()}" ajax="true">
+                                    <i class=""></i>Guardar
+                                </p:commandLink>
+
+                            </div>
+                        </h:form> 
+
+                </div>
+               
+            </p:dialog>
+
+        </ui:define>
+    </ui:composition>
+
+</html>

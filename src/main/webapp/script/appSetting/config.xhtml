@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:pe="http://primefaces.org/ui/extensions">
+
+
+    <ui:composition template="/script/template_inbox.xhtml">
+        <ui:define name="title">
+            <h:outputText value="#{applicationBean.helpdeskTitle} - #{bundle.ListAppSettingTitle}"></h:outputText>
+        </ui:define>
+
+        <ui:define name="body">
+            <div class="page-header">
+                <h1 class="col-xs-12 text-center text-left-sm">
+                    <i class="fa fa-wrench page-header-icon"></i>
+                    &nbsp;&nbsp;Configuración</h1>
+            </div> <!-- / .page-header -->
+            <p:messages id="messages" showSummary="true"/> 
+            <div class="row">
+                <div class="col-md-4 col-lg-3">
+                    <div class="panel">
+                          <div class="panel-heading">
+                            <span class="panel-title"><i class="panel-title-icon fa fa-picture-o"></i>Logo de su empresa</span>
+                        </div>
+                        <div class="panel-body">
+                            <h:form enctype="multipart/form-data" styleClass="panel panel-transparent form-horizontal">
+                            <h:panelGrid>
+                                <p:graphicImage id="imageLogoPreview0" 
+                                                value="#{applicationBean.logo}" cache="false"/>
+                                <p:fileUpload id="logo" value="#{appSettingController.logoUploadFile}" uploadLabel="envia" 
+                                              mode="simple" update=":form"/>  
+                            </h:panelGrid>
+                       
+                            
+                               <div class="panel-footer text-right">
+
+                                   <p:commandLink action="#{appSettingController.submitLogo()}"  
+                                                   styleClass="btn btn-primary btn-outline btn-xs"
+                                                   ajax="false" 
+                                                   update=":reportForm" style="float: right;" process="@form">
+                                        <i class="btn-label fa fa-disk"></i>Guardar Logo
+                                    </p:commandLink>
+                                </div>
+                                 </h:form>
+                        </div>
+                        
+
+                    </div>
+                </div>
+                <div class="col-md-8 col-lg-9">
+                    <div class="panel">   
+                        <h:form id="form" styleClass="panel panel-transparent form-horizontal">
+                            <div class="panel-body">
+
+                                <ui:repeat value="#{appSettingController.settings}" var="data">
+                                    <div class="row form-group">
+                                        <label class="col-sm-3 control-label">
+                                            <p:outputLabel value="#{data.label}" style="font-weight: bold;"/>
+                                        </label>
+                                        <div class="col-sm-9">
+                                            <p:inputText id="txt" styleClass="form-control"
+                                                         value="#{data.settingValue}" 
+                                                         required="#{data.required}" 
+                                                         rendered="#{data.type eq 'input'}"/> 
+                                            <p:message for="txt"/>
+
+                                            <p:inputText id="txtarea" styleClass="form-control"
+                                                         value="#{data.settingValue}" 
+                                                         required="#{data.required}" 
+                                                         rendered="#{data.type eq 'input_textarea'}"/> 
+                                            <p:message for="txtarea"/>
+
+                                            <h:panelGrid columns="2" rendered="#{data.type eq 'inputhtml'}">
+                                                <pe:ckEditor id="ckEditor" value="#{data.settingValue}" required="#{data.required}" height="210" language="es"
+                                                             toolbar="#{applicationBean.ckEditorToolbar}"
+                                                             width="100%"/>
+                                                <p:message for="ckEditor"/>
+                                                <p:commandLink id="overlayBtn" value="Marcadores" />
+
+                                                <p:overlayPanel id="MarcadoresPanel" for="overlayBtn" hideEffect="fade" dynamic="true"> 
+                                                    <p:dataTable value="#{clippingController.availablePlaceHolders}" var="holder" emptyMessage="No hay placeholders disponibles.">
+                                                        <p:column headerText="Marcadores de posición">
+                                                            <h:outputText value="\${#{holder}}"/>
+                                                        </p:column>
+                                                        <f:facet name="footer">
+                                                            <h:outputText value="Utilice marcadores de posición para insertar información (del caso) usada con frecuencia fácilmente en el texto."/>
+                                                        </f:facet>
+                                                    </p:dataTable>
+                                                </p:overlayPanel>
+                                            </h:panelGrid>
+
+                                            <p:selectOneButton id="booleanchoice" value="#{data.settingValue}" required="#{data.required}"  
+                                                               rendered="#{data.type eq 'booleanchoice'}"
+                                                               style="vertical-align:middle;">
+                                                <f:selectItem itemLabel="Habilitado" itemValue="true"/>
+                                                <f:selectItem itemLabel="Desabilitado" itemValue="false"/>
+                                            </p:selectOneButton>
+                                            <p:message for="booleanchoice"/>
+                                            <p class="help-block">#{data.descripcion}</p>
+                                        </div>
+
+                                    </div>
+
+                                </ui:repeat>
+
+                                <div class="panel-footer text-right">
+
+                                    <p:commandLink action="#{appSettingController.submitForm}"  
+                                                   styleClass="btn btn-primary btn-labeled"
+                                                   ajax="false" 
+                                                   update=":reportForm" style="float: right;" process="@form">
+                                        <i class="btn-label fa fa-disk"></i>Guardar Configuración
+                                    </p:commandLink>
+                                </div>
+
+                            </div>
+                        </h:form>
+
+                    </div>
+                </div>
+                
+            </div>
+
+
+
+
+        </ui:define>
+
+        <ui:define name="dialogs">
+
+        </ui:define>
+    </ui:composition>
+
+</html>

@@ -1,0 +1,219 @@
+<?xml version="1.0" encoding="utf-8"?>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"      
+      xmlns:composite="http://java.sun.com/jsf/composite"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:ui="http://java.sun.com/jsf/facelets">
+    <composite:interface>
+        <composite:attribute name="controllerMBean" required="true" /> 
+        <composite:attribute name="filterHelper" required="true" /> 
+        <composite:attribute name="showApplyAction" default="true" /> 
+        <composite:attribute name="canChangeFilters" default="true" />
+        <composite:attribute name="parentId" required="true" />
+        <composite:attribute name="legend" default="Filtros de la Vista" />
+        <composite:attribute name="update" default=":mainform:messages" />
+
+        <composite:facet name="saveView" />
+    </composite:interface>
+
+    <composite:implementation>
+        <h:panelGroup id="panelFilter"  style="border: none;">
+            <ui:repeat 
+                id="filtrosVista" 
+                value="#{cc.attrs.filterHelper.vista.filtrosVistaList}" var="filtro">     
+
+
+                <div class="row">
+                    <div class="col-xs-4 col-sm-4">
+                        <div class="form-group no-margin-hr">
+                            <h:selectOneMenu id="idCampo"  value="#{filtro.idCampo}" disabled="#{not cc.attrs.canChangeFilters}"
+                                             style="" styleClass="form-control input-sm select2Input"
+                                             required="true" requiredMessage="Favor Seleccione Attributo.">
+                                <f:selectItem itemLabel="seleccione un atributo" itemValue="" noSelectionOption="true"/>
+                                <f:selectItems value="#{cc.attrs.filterHelper.comparableFields}" var="comparableField" itemValue="#{comparableField.idCampo}" itemLabel="#{comparableField.label}"/>
+                                <p:ajax update=":#{cc.clientId}:panelFilter" listener="#{cc.attrs.filterHelper.handleIdCampoChangeEvent(filtro)}"/>
+                            </h:selectOneMenu>
+
+                        </div>
+                    </div>
+                    <div class="col-xs-3 col-sm-2">
+                        <div class="form-group no-margin-hr">
+                            <h:selectOneMenu id="idComparador" value="#{filtro.idComparador}" rendered="#{filtro.idCampo ne null}" 
+                                             disabled="#{not cc.attrs.canChangeFilters}"
+                                             styleClass="form-control input-sm select2Input"
+                                             required="true" requiredMessage="Favor Seleccione Operador.">
+                                <f:selectItem itemLabel="Operador..." itemValue="" noSelectionOption="true"/>
+                                <f:selectItems value="#{cc.attrs.filterHelper.findTipoComparacionesAvailable(filtro.idCampo)}" var="tipoComparador" itemValue="#{tipoComparador}" itemLabel="#{tipoComparador.nombre}" itemDescription="#{tipoComparador.descripcion}"/>
+                                <p:ajax update=":#{cc.clientId}:panelFilter" listener="#{cc.attrs.filterHelper.handleOperadorChangeEvent(filtro)}"/>
+                            </h:selectOneMenu>
+
+                        </div>
+                    </div>
+                    <div class="col-xs-4 col-sm-5">
+                        <div class="form-group no-margin-hr">
+                            <h:inputText id="valortext" value="#{filtro.valor}" styleClass="form-control input-sm"
+                                         rendered="#{filtro.idCampo ne null and filtro.idComparador ne null and cc.attrs.filterHelper.getComparableField(filtro.idCampo).fieldTypeId.fieldTypeId eq 'TEXT'}" 
+                                         required="true" requiredMessage="Se necesita un valor para comparar." disabled="#{not cc.attrs.canChangeFilters}"/>
+
+                            <p:autoComplete value="#{filtro.valoresList}" forceSelection="true"  disabled="#{not cc.attrs.canChangeFilters}"
+                                            required="true" requiredMessage="Se necesita un valor para comparar."
+                                            completeMethod="#{applicationBean.findEtiquetasByPattern}" multiple="true"
+                                            rendered="#{filtro.idCampo ne null and filtro.idComparador ne null and cc.attrs.filterHelper.getComparableField(filtro.idCampo).fieldTypeId.fieldTypeId eq 'COMMA_SEPARATED_VALUELIST'}"/> 
+
+                            <p:selectOneRadio id="valorradio" value="#{filtro.valor}" disabled="#{not cc.attrs.canChangeFilters}" 
+                                              required="true" requiredMessage="Se necesita un valor para comparar."
+                                              rendered="#{filtro.idCampo ne null and filtro.idComparador ne null and cc.attrs.filterHelper.getComparableField(filtro.idCampo).fieldTypeId.fieldTypeId eq 'RADIO'}">
+                                <f:selectItems value="#{cc.attrs.filterHelper.findPosibleOptionsIncludingAllPlaceHolders(filtro.idCampo, UserSessionBean.current)}" />
+                            </p:selectOneRadio>
+
+                           <script type="text/javascript">
+                                $(function() {
+                                    jQuery(".typeahead").typeahead({
+                                        remote: '#{facesContext.externalContext.requestContextPath}/EmailClienteListServlet?tenant=#{UserSessionBean.tenantId}&amp;q=%QUERY',
+                                        highlight: true,
+                                        displayKey: 'email',
+                                        minLength: 3
+                                    });
+                                });
+                            </script>
+
+                          
+
+                            <p:autoComplete value="#{filtro.valor}" disabled="#{not cc.attrs.canChangeFilters}"
+                                            id="valorentity11" completeMethod="#{emailClienteController.completeEmailCliente}"  
+                                            var="email"  itemValue="#{email.emailCliente}" itemLabel="#{email}"
+                                            required="true" requiredMessage="Debe Seleccionar un email."
+                                            rendered="#{filtro.idCampo ne null and filtro.idComparador ne null 
+                                                        and cc.attrs.filterHelper.getComparableField(filtro.idCampo).fieldTypeId.fieldTypeId eq 'SELECTONE_ENTITY' 
+                                                        and filtro.idComparador.idComparador ne 'SC' and filtro.idCampo eq 'emailCliente'}">  
+
+                                <f:facet name="itemtip">
+                                    <h:panelGrid  columns="2" cellpadding="5">  
+                                        <f:facet name="header">  
+                                            <h:outputText value="#{email.emailCliente}" />  
+                                        </f:facet>  
+
+                                        <h:outputText value="Nombre: " />  
+                                        <h:outputText value="#{email.cliente.nombres}" />  
+
+                                        <h:outputText value="Apellidos: " />  
+                                        <h:outputText value="#{email.cliente.apellidos}" /> 
+
+                                        <h:outputText value="Rut: " />  
+                                        <h:outputText value="#{email.cliente.rut}" /> 
+                                    </h:panelGrid>  
+                                </f:facet>  
+
+                            </p:autoComplete>    
+
+                            <div class="select2-primary">
+                                <h:selectManyListbox id="valorentity2" label="Selección..."  disabled="#{not cc.attrs.canChangeFilters}" 
+                                                     value="#{filtro.valoresList}"  styleClass="form-control input-sm select2Multiple"
+                                                     required="true" requiredMessage="Se necesita un valor para comparar."
+                                                     rendered="#{filtro.idCampo ne null and filtro.idComparador ne null 
+                                                                 and cc.attrs.filterHelper.getComparableField(filtro.idCampo).fieldTypeId.fieldTypeId eq 'SELECTONE_ENTITY' 
+                                                                 and filtro.idComparador.idComparador eq 'SC'}">
+                                    <f:selectItems value="#{cc.attrs.filterHelper.findPosibleOptions(filtro.idCampo, UserSessionBean.current)}" />
+                                </h:selectManyListbox>
+                            </div>
+
+                            <h:selectOneMenu id="placeHolder1" value="#{filtro.valor}" disabled="#{not cc.attrs.canChangeFilters}" 
+                                             styleClass="form-control input-sm select2Input"
+                                             required="true" requiredMessage="Se necesita un valor para comparar."
+                                             rendered="#{filtro.idCampo ne null and filtro.idComparador ne null and cc.attrs.filterHelper.getComparableField(filtro.idCampo).fieldTypeId.fieldTypeId eq 'SELECTONE_PLACE_HOLDER'}">
+                                <f:selectItems value="#{cc.attrs.filterHelper.findPosibleOptionsGenericEntityPlaceHolders(filtro.idCampo)}" />
+                            </h:selectOneMenu>
+
+                            <h:selectOneMenu id="valorentity1" value="#{filtro.valor}" disabled="#{not cc.attrs.canChangeFilters}" 
+                                             styleClass="form-control input-sm select2Input" 
+                                             required="true" requiredMessage="Se necesita un valor para comparar."
+                                             rendered="#{filtro.idCampo ne null and filtro.idComparador ne null and cc.attrs.filterHelper.getComparableField(filtro.idCampo).fieldTypeId.fieldTypeId eq 'SELECTONE_ENTITY' and filtro.idComparador.idComparador ne 'SC' and filtro.idCampo ne 'emailCliente'}">
+                                <f:selectItems value="#{cc.attrs.filterHelper.findPosibleOptionsIncludingAllPlaceHolders(filtro.idCampo, UserSessionBean.current)}" />
+                            </h:selectOneMenu>
+
+
+
+                            <h:selectOneMenu id="valorcheckboolean" value="#{filtro.valor}" disabled="#{not cc.attrs.canChangeFilters}"
+                                             required="true" requiredMessage="Se necesita un valor para comparar."
+                                             styleClass="form-control input-sm select2Input"
+                                             rendered="#{filtro.idCampo ne null and filtro.idComparador ne null and cc.attrs.filterHelper.getComparableField(filtro.idCampo).fieldTypeId.fieldTypeId eq 'CHECKBOX'}">
+                                <f:selectItems value="#{cc.attrs.filterHelper.findPosibleOptionsIncludingAllPlaceHolders(filtro.idCampo, UserSessionBean.current)}" />
+                            </h:selectOneMenu>
+
+                            <!--dates -->
+
+                            <h:inputText id="valorcalendar1" styleClass="form-control form_datetime input-sm" 
+                                         disabled="#{not cc.attrs.canChangeFilters}" value="#{filtro.valor}"  title="Desde:"
+                                         required="true" requiredMessage="Se requiere que ingrese un valor."
+                                         rendered="#{filtro.idCampo ne null and filtro.idComparador ne null and cc.attrs.filterHelper.getComparableField(filtro.idCampo).fieldTypeId.fieldTypeId eq 'CALENDAR'}" />
+                            <h:inputText id="valorcalendar2" styleClass="form-control form_datetime input-sm" value="#{filtro.valor2}" 
+                                         disabled="#{not cc.attrs.canChangeFilters}"  title="Hasta:"
+                                         required="true" requiredMessage="Se necesita un valor para comparar."
+                                         rendered="#{filtro.idCampo ne null and filtro.idComparador ne null and cc.attrs.filterHelper.getComparableField(filtro.idCampo).fieldTypeId.fieldTypeId eq 'CALENDAR' and filtro.idComparador.idComparador eq 'BW'}" />
+
+
+
+
+                        </div>
+                    </div>
+                    <div class="col-xs-1 col-sm-1">
+                        <div class="form-group no-margin-hr">
+                            <p:commandLink id="remove"  styleClass="btn btn-danger btn-outline"
+                                           actionListener="#{cc.attrs.filterHelper.vista.removeFiltroFromVista(filtro)}" 
+                                           ajax="true" immediate="false"
+                                           update=":#{cc.clientId}:panelFilter" title="Quitar filtro"
+                                           disabled="#{not cc.attrs.canChangeFilters}">
+                                <i class="fa fa-times"></i>
+                            </p:commandLink>
+                        </div>
+                    </div>
+                </div>
+
+
+            </ui:repeat>
+
+            <p:commandLink id="addButton" 
+                           actionListener="#{cc.attrs.filterHelper.vista.addNewFiltroVista()}" 
+                           style="color: #146eaa; float: left;"
+                           update=":#{cc.clientId}:panelFilter" 
+                           disabled="#{not cc.attrs.canChangeFilters}">
+                <i class="fa fa-plus"></i> Agregar filtro
+            </p:commandLink>
+
+            <p:commandLink id="linkAplicar" styleClass="btn btn-primary btn-outline" 
+                           ajax="true" update="#{cc.attrs.update}" rendered="#{cc.attrs.showApplyAction}" style="float: right"
+                           title="Aplicar Filtro" 
+                           disabled="#{not cc.attrs.canChangeFilters}"
+                           actionListener="#{cc.attrs.controllerMBean.filter()}">
+                <i class="fa fa-play"></i>#{empty cc.attrs.filterHelper.vista.filtrosVistaList ? ' Desplegar Todo':' Filtrar'}
+            </p:commandLink>
+
+            <composite:renderFacet name="saveView" />
+
+            <script type="text/javascript">
+                $(".select2Input").select2({
+                    dropdownAutoWidth: true,
+                    allowClear: true
+                });
+
+                $(".select2Multiple").select2({
+                    dropdownAutoWidth: true,
+                    allowClear: true
+                });
+
+                $('.form_datetime').datetimepicker({
+                    language: 'es',
+                    format: 'dd/mm/yyyy hh:ii',
+                    viewformat: 'dd/mm/yyyy hh:ii',
+                    todayBtn: true,
+                    autoclose:true,
+                    todayHighlight: true,
+                    weekStart: 1,
+                    forceParse: true
+                });
+            </script>
+        </h:panelGroup>
+        <br/>
+    </composite:implementation>
+</html>

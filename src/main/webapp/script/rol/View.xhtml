@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:p="http://primefaces.org/ui">
+
+    <ui:composition template="/script/template_inbox.xhtml">
+        <ui:define name="title">
+            <h:outputText value="#{bundle.ViewRolTitle}"></h:outputText>
+        </ui:define>
+        <ui:define name="west">
+
+        </ui:define>
+        <ui:define name="body">
+
+            <div class="page-header">
+                <h1><span class="text-light-gray"><i class="fa fa-puzzle-piece page-header-icon"></i>&nbsp;Roles de usuarios </span>/&nbsp; Detalle del Rol #{rolController.selected.idRol}</h1>
+            </div> <!-- / .page-header -->
+
+
+            <div class="row">
+                <div class="col-sm-12 col-lg-6">
+
+                    <h:form id="form" styleClass="panel form-horizontal">
+
+                        <div class="panel-body">
+
+                            <div class="row form-group">
+                                <label class="col-sm-4 control-label">#{bundle.EditRolLabel_idRol}</label>
+                                <div class="col-sm-8">
+                                    <h:outputText value="#{rolController.selected.idRol}" />
+                                </div>
+                            </div>
+                            <div class="row form-group">
+                                <label class="col-sm-4 control-label">#{bundle.EditRolLabel_nombre}</label>
+                                <div class="col-sm-8">
+                                    <h:outputText value="#{rolController.selected.nombre}" title="#{bundle.ViewRolTitle_nombre}"/>
+                                </div>
+                            </div>
+                            <div class="row form-group">
+                                <label class="col-sm-4 control-label">#{bundle.EditRolLabel_descripcion}</label>
+                                <div class="col-sm-8">
+                                    <h:outputText value="#{rolController.selected.descripcion}" title="#{bundle.ViewRolTitle_descripcion}"/>
+                                </div>
+                            </div>
+
+                            <div class="row form-group">
+                                <div class="col-sm-12">
+
+
+                                    <div class="panel-body">
+                                        <h:dataTable value="#{rolController.selected.funcionList}" var="func" styleClass="table table-striped"> 
+                                            <f:facet name="header">  
+                                                <h:outputText value="Funciones Asociadas al Rol"></h:outputText>                           
+                                            </f:facet> 
+                                            <h:column>
+                                                <f:facet name="header">
+                                                    <h:outputText value="Nombre" />
+                                                </f:facet>
+                                                <h:outputText value="#{func.nombre}" />
+                                            </h:column>
+                                            <h:column>
+                                                <f:facet name="header">
+                                                    <h:outputText value="Descripción" />
+                                                </f:facet>
+                                                <h:outputText value="#{func.descripcion}" />
+                                            </h:column>
+                                        </h:dataTable>
+                                    </div>
+
+
+                                </div>
+                            </div>
+                        </div>
+
+
+
+                        <div class="panel-footer text-right">
+                            <p:commandLink styleClass="btn btn-danger"
+                                           disabled="#{not rolController.puedeEditar(rolController.selected)}"
+                                           rendered="#{filtroAcceso.verificarAccesoAFuncionEditarAjustes()}"
+                                           onclick="confirmation.show()">
+                                <i class="fa fa-save"></i>&nbsp;#{bundle.ViewRolDestroyLink}
+                            </p:commandLink>     
+                            &nbsp;
+                            <p:commandLink action="#{rolController.prepareList}" styleClass="btn btn-default"
+                                           immediate="true" ajax="false">
+                                <i class="fa fa-chevron-left"></i>&nbsp;Volver
+                            </p:commandLink>
+                            &nbsp;
+
+                            <p:commandLink action="Edit" ajax="false" styleClass="btn btn-primary"
+                                           rendered="#{filtroAcceso.verificarAccesoAFuncionEditarAjustes()}"
+                                           disabled="#{not rolController.puedeEditar(rolController.selected)}" >
+                                <i class="fa fa-save"></i>&nbsp;#{bundle.ViewRolEditLink}
+                            </p:commandLink>                              
+                        </div>
+
+                        <p:dialog id="confirmDialog" showEffect="fade" hideEffect="fade" 
+                                  header="Iniciando proceso de eliminación" widgetVar="confirmation">
+
+                            <h:outputText value="Está seguro de eliminar el rol #{rolController.selected.nombre}?"/>
+
+                            <f:facet name="footer">
+                                <p:commandButton id="confirm" value="#{bundle.yesDelete}" action="#{rolController.destroy}" 
+                                                 update="form" oncomplete="confirmation.hide()"/>
+                                <p:commandButton id="decline" value="#{bundle.Cancel}" onclick="confirmation.hide()" type="button" /> 
+                            </f:facet>
+
+                        </p:dialog>
+
+                    </h:form> 
+                </div>
+            </div>
+
+
+        </ui:define>
+    </ui:composition>
+
+</html>

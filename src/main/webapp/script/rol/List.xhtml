@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:p="http://primefaces.org/ui">
+
+    <ui:composition template="/script/template_inbox.xhtml">
+        <ui:define name="title">
+            <h:outputText value="Roles"></h:outputText>
+        </ui:define>
+
+        <ui:define name="body">
+
+
+
+            <div class="page-header">
+                <div class="row">
+                    <div class="col-sm-8">
+                        <h1><i class="fa fa-puzzle-piece page-header-icon"></i>Roles de usuarios</h1>
+                    </div>
+                    <div class="col-sm-4">
+                        <div class="pages pull-right">
+                            <h:form>
+                                <p:commandLink  ajax="false" action="#{rolController.prepareCreate}" styleClass="btn btn-primary"
+                                                rendered="#{filtroAcceso.verificarAccesoAFuncionEditarAjustes()}">
+                                    <i class="fa fa-plus"></i>&nbsp;Crear Nuevo Rol
+                                </p:commandLink>
+                            </h:form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+
+            <div class="row">
+                <div class="col-md-8 col-lg-9">
+                    <h:form id="form">
+
+                        <div class="mail-controls clearfix">
+
+                            <div class="btn-toolbar pull-left" role="toolbar">
+
+                                <div id="nav_buttons" class="btn-group">
+                                    <h:outputText value="#{rolController.pagination.pageFirstItem + 1}-#{rolController.pagination.pageLastItem + 1} de #{rolController.pagination.itemsCount}" 
+                                                  rendered="#{rolController.pagination.itemsCount gt 0}" />
+                                </div>
+                            </div>
+                            
+                            <div class="btn-toolbar pull-right" role="toolbar">
+
+                                <div id="nav_buttons" class="btn-group">
+                                    <h:selectOneMenu id="cant" styleClass="form-control input-sm"  
+                                                     value="#{rolController.paginationPageSize}">
+                                        <p:ajax event="change" listener="#{rolController.resetPageSize()}"
+                                                update=":form"/>
+                                        <f:selectItems value="#{rolController.pagination.pageSizesAvailable}"/>
+                                    </h:selectOneMenu>
+                                </div>
+
+
+
+
+                                <div id="nav_buttons" class="btn-group">
+                                    <p:commandLink action="#{rolController.previous}" styleClass="btn" 
+                                                   update=":form" disabled="#{not rolController.pagination.hasPreviousPage}" 
+                                                   rendered="#{rolController.pagination.itemsCount > 0}">
+                                        <i class="fa fa-chevron-left"></i>
+                                    </p:commandLink>
+
+                                    <p:commandLink action="#{rolController.next}" styleClass="btn" 
+                                                   update=":form" 
+                                                   disabled="#{not rolController.pagination.hasNextPage}" 
+                                                   rendered="#{rolController.pagination.itemsCount > 0}">
+                                        <i class="fa fa-chevron-right"></i>
+                                    </p:commandLink>
+
+                                </div>
+                            </div>
+
+
+
+                        </div>
+
+
+
+
+                        <div class="row">
+
+
+                            <h:outputText escape="false" value="#{bundle.ListRolEmpty}" rendered="#{rolController.items.rowCount == 0}"/>
+                            <h:panelGroup rendered="#{rolController.items.rowCount > 0}" >
+
+
+                                <p:dataTable id="tablaroles" widgetVar="RolTable" var="item" value="#{rolController.items}" selectionMode="single"
+                                             emptyMessage="#{bundle.ListRolEmpty}">
+                                  
+                                    <p:column  headerText="#{bundle.ListRolTitle_idRol}">
+
+                                        <h:outputText value="#{item.idRol}"/>
+                                    </p:column>
+                                    <p:column  headerText="#{bundle.ListRolTitle_nombre}">
+
+                                        <h:outputText value="#{item.nombre}"/>
+                                    </p:column>
+                                    <p:column headerText="#{bundle.ListRolTitle_descripcion}">
+
+                                        <h:outputText value="#{item.descripcion}"/>
+                                    </p:column>
+
+                                    <p:column headerText="Acción">
+                                        <p:commandButton id="viewBtn" ajax="false" action="#{rolController.prepareView(item)}" 
+                                                         disabled="#{not rolController.puedeEditar(item)}" rendered="#{filtroAcceso.verificarAccesoAFuncionEditarAjustes()}" title="Ver" icon="ui-icon ui-icon-document"/>
+                                        <p:commandButton id="editBtn" ajax="false" action="#{rolController.prepareEdit(item)}" 
+                                                         disabled="#{not rolController.puedeEditar(item)}" rendered="#{filtroAcceso.verificarAccesoAFuncionEditarAjustes()}" title="Editar" icon="ui-icon ui-icon-pencil"/>
+                                        <p:commandButton id="showDialogButton" title="Eliminar" update=":form:confirmDialog" 
+                                                         action="#{rolController.setSelected(item)}" oncomplete="confirmation.show()" disabled="#{not rolController.puedeEditar(item)}" 
+                                                         rendered="#{filtroAcceso.verificarAccesoAFuncionEditarAjustes()}" icon="ui-icon ui-icon-trash"/>
+                                    </p:column>
+
+                                    <f:facet name="footer">
+
+
+                                    </f:facet> 
+                                </p:dataTable>
+
+                            </h:panelGroup>
+
+
+                            <br />
+                            <p:commandButton ajax="false" action="#{rolController.prepareCreate}" value="#{bundle.ListRolCreateLink}" 
+                                             rendered="#{rolController.items.rowCount == 0}" icon="ui-icon ui-icon-plus"/>
+
+                            <p:dialog id="confirmDialog" showEffect="fade" hideEffect="fade" 
+                                      header="Iniciando proceso de eliminación" widgetVar="confirmation">
+
+                                <h:outputText value="Está seguro de eliminar el rol #{rolController.selected.nombre}?"/>
+
+                                <f:facet name="footer">
+                                    <p:commandButton id="confirm" value="#{bundle.yesDelete}" action="#{rolController.destroy()}" 
+                                                     ajax="false"/>
+                                    <p:commandButton id="decline" value="#{bundle.decline}" onclick="confirmation.hide()" type="button" /> 
+                                </f:facet>
+
+                            </p:dialog>
+
+
+                        </div>
+
+
+
+                    </h:form>
+                </div>
+
+                <div class="col-md-4 col-lg-3">
+                    <div class="note note-default padding-xs-vr">
+                        <h:outputLabel escape="false" value="#{bundle.ayudaRoles}"/>
+                    </div>
+                </div>
+
+            </div>
+
+
+
+
+        </ui:define>
+    </ui:composition>
+
+</html>

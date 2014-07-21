@@ -1,0 +1,387 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:pe="http://primefaces.org/ui/extensions">
+
+    <ui:composition template="/script/template_inbox.xhtml">
+        <ui:define name="title">
+            <h:outputText value="#{bundle.EditAreaTitle}"></h:outputText>
+        </ui:define>
+
+
+
+        <ui:define name="body">
+
+             <script type="text/javascript">
+                    init.push(function() {
+                        $("#form:emailFrecuencia_input").spinner();
+                        $('#form:mailUseJndi').switcher();                      
+                    });
+                </script>
+            
+            <div class="page-header">
+                <h1 class="col-xs-12 text-left-sm">
+                    <i class="fa fa-building-o page-header-icon"></i>&nbsp;<span class="text-light-gray">Áreas / </span>#{bundle.EditAreaTitle}:&nbsp;#{areaController.selected.idArea}</h1>
+            </div> <!-- / .page-header -->
+            
+             <div class="row">
+                    
+                    <div class="col-lg-9 col-md-9">
+                            <h:form id="form" styleClass="form-horizontal">
+
+                    <h:panelGroup styleClass="panel">
+                    
+                        <div class="panel-heading">
+                            <span class="panel-title">Datos del Área</span>
+                        </div>
+                        <div class="panel-body">
+                            
+                              <p:messages/>
+                              
+                           
+                            <div class="row form-group">
+                                <label class="col-sm-4 control-label">#{bundle.CreateAreaLabel_nombre}</label>
+                                <div class="col-sm-8">
+                                    <h:inputText id="nombre" value="#{areaController.selected.nombre}" styleClass="form-control"
+                                                 title="#{bundle.CreateAreaTitle_nombre}" 
+                                                 required="true" requiredMessage="Favor ingrese un nombre para el área." size="40"/>
+                                    <p:message for="nombre"/>
+                                </div>
+                            </div>
+                            <div class="row form-group">
+                                <label class="col-sm-4 control-label">#{bundle.CreateAreaLabel_descripcion}</label>
+                                <div class="col-sm-8">
+                                    <h:inputTextarea id="descripcion" styleClass="form-control"
+                                                     value="#{areaController.selected.descripcion}" 
+                                                     title="#{bundle.CreateAreaTitle_descripcion}" />
+                                    <p:message for="descripcion"/>
+                                </div>
+                            </div>
+                            <hr class="panel-wide"></hr>
+                            <h6 class="text-light-gray text-semibold text-xs" style="margin:20px 0 10px 0;">CORREO</h6>
+
+                            <div class="row form-group">
+                                <label class="col-sm-4 control-label">#{bundle.EditAreaTitle_emailEnabled}</label>
+                                <div class="col-sm-8">
+                                    <p:selectBooleanButton id="emailEnabled" offLabel="Desabilitado" onLabel="Habilitado" immediate="true"
+                                                           value="#{areaController.selected.emailEnabled}">
+                                        <p:ajax update="mailUseJndi mailSessionJndiname emailFrecuencia mail_debug" process="@this" listener="#{areaController.handleSimpleChange()}" /> 
+                                    </p:selectBooleanButton>
+                                </div>
+                            </div>
+                            <div class="row form-group">
+                                <label class="col-sm-4 control-label">#{bundle.EditAreaLabel_mailUseJndi}</label>
+                                <div class="col-sm-8">
+
+                                   <h:selectBooleanCheckbox id="mailUseJndi" 
+                                                                 value="#{areaController.selected.mailUseJndi}" disabled="#{not areaController.selected.emailEnabled}">
+                                            <p:ajax update=":form" process="@parent" listener="#{areaController.handleUseJndiChange()}" /> 
+                                        </h:selectBooleanCheckbox>
+
+
+                                </div>
+                            </div>
+                            <div class="row form-group">
+                                <label class="col-sm-4 control-label">#{bundle.EditAreaLabel_mailSessionJndiname}</label>
+                                <div class="col-sm-8">
+                                    <h:inputText id="mailSessionJndiname" styleClass="form-control"
+                                                 disabled="#{not areaController.selected.emailEnabled or not areaController.selected.mailUseJndi}"
+                                                 value="#{areaController.selected.mailSessionJndiname}" 
+                                                 title="#{bundle.EditAreaTitle_mailSessionJndiname}" />
+                                </div>
+                            </div>
+                            <div class="row form-group">
+                                <label class="col-sm-4 control-label">#{bundle.EditAreaLabel_emailFrecuencia}</label>
+                                <div class="col-sm-8">
+                                    <h:inputText id="emailFrecuencia" styleClass="form-control"
+                                                 value="#{areaController.selected.emailFrecuencia}" 
+                                                 required="true" requiredMessage="Ingrese #{bundle.EditAreaLabel_emailFrecuencia}."
+                                                 title="#{bundle.EditAreaTitle_emailFrecuencia}" 
+                                                 disabled="#{not areaController.selected.emailEnabled}">
+                                    </h:inputText>
+                                </div>
+                            </div>
+                            <div class="row form-group">
+                                <label class="col-sm-4 control-label">Debug:</label>
+                                <div class="col-sm-8">
+                                    <p:selectBooleanButton id="mail_debug" onLabel="Habilitado" 
+                                                           offLabel="Desabilitado" 
+                                                           value="#{areaController.selected.mailDebug}" 
+                                                           disabled="#{not areaController.selected.emailEnabled}"/>
+                                </div>
+                            </div>
+
+
+                            <hr class="panel-wide"></hr>
+                            <h6 class="text-light-gray text-semibold text-xs" style="margin:20px 0 10px 0;">USUARIO CORREO</h6>
+
+                            <div class="row form-group">
+                                <label class="col-sm-4 control-label">#{bundle.EditAreaLabel_mailSmtpFromname}</label>
+                                <div class="col-sm-8">
+                                    <h:inputText styleClass="form-control" id="mailSmtpFromname" 
+                                                 value="#{areaController.selected.mailSmtpFromname}" title="#{bundle.EditAreaTitle_mailSmtpFromname}" />
+
+                                </div>
+                            </div>
+                            <div class="row form-group">
+                                <label class="col-sm-4 control-label">#{bundle.EditAreaLabel_mailSmtpFrom}</label>
+                                <div class="col-sm-8">
+                                   <h:inputText styleClass="form-control" id="mailSmtpFrom" value="#{areaController.selected.mailSmtpFrom}" title="#{bundle.EditAreaTitle_mailSmtpFrom}" />
+
+                                </div>
+                            </div>
+                            <div class="row form-group">
+                                <label class="col-sm-4 control-label">#{bundle.EditAreaLabel_mailSmtpUser}</label>
+                                <div class="col-sm-8">
+                                    <h:inputText styleClass="form-control" id="mailSmtpUser" value="#{areaController.selected.mailSmtpUser}" title="#{bundle.EditAreaTitle_mailSmtpUser}" />
+
+                                </div>
+                            </div>
+                            <div class="row form-group">
+                                <label class="col-sm-4 control-label">#{bundle.EditAreaLabel_mailSmtpPassword}</label>
+                                <div class="col-sm-8">
+                                    <h:inputSecret styleClass="form-control" id="mailSmtpPassword" value="#{areaController.selected.mailSmtpPassword}" 
+                                                   title="#{bundle.EditAreaTitle_mailSmtpPassword}" redisplay="true"/>
+
+                                </div>
+                            </div>
+
+                            <hr class="panel-wide"></hr>
+                            <h6 class="text-light-gray text-semibold text-xs" style="margin:20px 0 10px 0;">CORREO ENTRADA</h6>
+
+                            <div class="row form-group">
+                                <label class="col-sm-4 control-label">#{bundle.EditAreaLabel_mailServerType}</label>
+                                <div class="col-sm-8">
+
+                                    <p:selectOneButton id="mailServerType" value="#{areaController.selected.mailServerType}" >  
+                                        <f:selectItem itemLabel="POP/IMAP" itemValue="popimap" />  
+                                        <f:selectItem itemLabel="Exchange" itemValue="exchange" />  
+                                        <p:ajax update=":form" process="@all" listener="#{areaController.handleEmailServerTypeChange()}" /> 
+                                    </p:selectOneButton>
+
+                                </div>
+                            </div>
+                            <div class="row form-group">
+                                <label class="col-sm-4 control-label">#{bundle.EditAreaLabel_mailStoreProtocol}</label>
+                                <div class="col-sm-8">
+
+                                    <p:selectOneButton id="mailStoreProtocol" value="#{areaController.selected.mailStoreProtocol}" disabled="#{not areaController.showStoreProtocol}">  
+                                        <f:selectItem itemLabel="pop3" itemValue="pop3" />
+                                        <f:selectItem itemLabel="imap" itemValue="imap" />  
+                                        <f:selectItem itemLabel="pop3s" itemValue="pop3s" />  
+                                        <f:selectItem itemLabel="imaps" itemValue="imaps" />  
+                                        <p:ajax update=":form" process="@all" listener="#{areaController.handleMailStoreProtocolChange()}" /> 
+                                    </p:selectOneButton> 
+                                </div>
+                            </div>
+                            <div class="row form-group">
+                                <label class="col-sm-4 control-label">Dominio:</label>
+                                <div class="col-sm-8">
+                                    <h:inputText id="sendMailExchangeInbound" value="#{areaController.selected.dominioExchangeInbound}" styleClass="form-control"
+                                                 disabled="#{not areaController.sendMailExchangeInbound}"/>
+                                </div>
+                            </div>
+                            <div class="row form-group">
+                                <label class="col-sm-4 control-label">#{bundle.EditAreaLabel_mailInboundHost}</label>
+                                <div class="col-sm-8">
+
+                                    <h:inputText id="mailInboundHost" value="#{areaController.selected.mailInboundHost}" styleClass="form-control"
+                                                 title="#{bundle.EditAreaTitle_mailInboundHost}"  />
+
+                                </div>
+                            </div>
+                            <div class="row form-group">
+                                <label class="col-sm-4 control-label">#{bundle.EditAreaLabel_mailInboundPort}</label>
+                                <div class="col-sm-8">
+                                    <h:inputText id="mailInboundPort" value="#{areaController.selected.mailInboundPort}" styleClass="form-control"
+                                                 title="#{bundle.EditAreaTitle_mailInboundPort}"  />
+                                </div>
+                            </div>
+                            <div class="row form-group">
+                                <label class="col-sm-4 control-label">#{bundle.EditAreaLabel_mailInboundSslEnabled}</label>
+                                <div class="col-sm-8">
+                                    <p:selectBooleanCheckbox id="mailInboundSslEnabled" value="#{areaController.selected.mailInboundSslEnabled}"  />
+                                </div>
+                            </div>
+                            <div class="row form-group">
+                                <label class="col-sm-4 control-label">#{bundle.EditAreaLabel_emailAcusederecibo}</label>
+                                <div class="col-sm-8">
+                                    <p:selectBooleanCheckbox id="emailAcusederecibo" value="#{areaController.selected.emailAcusederecibo}"/>
+                                </div>
+                            </div>
+                            <div class="row form-group">
+                                <label class="col-sm-4 control-label">Subject Respuesta Automática:</label>
+                                <div class="col-sm-8">
+                                   
+                                        <h:inputText styleClass="form-control" value="#{areaController.selected.subjectRespAutomatica}" 
+                                                     title="#{bundle.EditAreaTitle_subjectRespAutomatica}" />
+
+                                        <p:commandLink id="overlayBtn" value="Marcadores de posición"  />  
+                                        <p:overlayPanel id="MarcadoresPanel" for="overlayBtn" hideEffect="fade" dynamic="true"> 
+                                            <p:dataTable value="#{clippingController.availablePlaceHolders}" var="holder" emptyMessage="No hay placeholders disponibles.">
+                                                <p:column headerText="Marcadores de posición">
+                                                    <h:outputText value="\${#{holder}}"/>
+                                                </p:column>
+                                                <f:facet name="footer">
+                                                    <h:outputText value="Utilice marcadores de posición para insertar información (del caso) usada con frecuencia fácilmente en el texto."/>
+                                                </f:facet>
+                                            </p:dataTable>
+                                        </p:overlayPanel>
+                                </div>
+                            </div>
+                            <div class="row form-group">
+                                <label class="col-sm-4 control-label">Mensaje Respuesta Automática:</label>
+                                <div class="col-sm-8">
+                                    <p:commandButton id="textoRespAutomaticaHtml" onclick="textohtml.show();" value="Editar texto html" update=":formtextoRespAutomatica"/>
+                                </div>
+                            </div>
+
+
+
+
+                            <hr class="panel-wide"></hr>
+                            <h6 class="text-light-gray text-semibold text-xs" style="margin:20px 0 10px 0;">CORREO SALIDA</h6>
+
+                            <div class="row form-group">
+                                <label class="col-sm-4 control-label">#{bundle.EditAreaLabel_mailServerType}</label>
+                                <div class="col-sm-8">
+                                    <p:selectOneButton id="mailServerTypeSalida" required="true" requiredMessage="Seleccione Tipo de servidor."
+                                                       value="#{areaController.selected.mailServerTypeSalida}" >  
+                                        <f:selectItem itemLabel="SMTP" itemValue="smtp" />  
+                                        <f:selectItem itemLabel="Exchange" itemValue="exchange" />  
+                                        <p:ajax update=":form" process="@all" listener="#{areaController.handleEmailServerTypeSalidaChange()}" /> 
+                                    </p:selectOneButton> 
+                                </div>
+                            </div>
+                            <div class="row form-group">
+                                <label class="col-sm-4 control-label">Dominio:</label>
+                                <div class="col-sm-8">
+                                    <h:inputText id="sendMailExchange" styleClass="form-control"
+                                                 value="#{areaController.selected.dominioExchangeSalida}" 
+                                                 disabled="#{not areaController.sendMailExchange}"/>
+                                </div>
+                            </div>
+                            <div class="row form-group">
+                                <label class="col-sm-4 control-label">#{bundle.EditAreaLabel_mailSmtpHost}</label>
+                                <div class="col-sm-8">
+                                    <h:inputText id="mailSmtpHost" value="#{areaController.selected.mailSmtpHost}" styleClass="form-control"
+                                                 title="#{bundle.EditAreaTitle_mailSmtpHost}" />
+                                </div>
+                            </div>
+                            <div class="row form-group">
+                                <label class="col-sm-4 control-label">#{bundle.EditAreaLabel_mailSmtpPort}</label>
+                                <div class="col-sm-8">
+                                    <h:inputText id="mailSmtpPort" value="#{areaController.selected.mailSmtpPort}" styleClass="form-control"
+                                                 title="#{bundle.EditAreaTitle_mailSmtpPort}" />
+                                </div>
+                            </div>
+                            <div class="row form-group">
+                                <label class="col-sm-4 control-label">Tipo de encriptación:</label>
+                                <div class="col-sm-8">
+
+                                    <p:selectOneButton id="encriptionType" 
+                                                       value="#{areaController.selected.mailSmtpEncriptionType}"
+                                                       required="true" requiredMessage="Ingrese tipo de encriptación."
+                                                       disabled="#{areaController.sendMailExchange}">  
+                                        <f:selectItem itemLabel="None" itemValue="NONE" />  
+                                        <f:selectItem itemLabel="SSL" itemValue="SSL/TLS" />  
+                                        <f:selectItem itemLabel="STARTTLS" itemValue="STARTTLS" />  
+                                        <p:ajax update=":form:encriptionType" listener="#{areaController.handleSmtpSslOrTlsChange()}" /> 
+                                    </p:selectOneButton>
+                                </div>
+                            </div>
+                            <div class="row form-group">
+                                <label class="col-sm-4 control-label">#{bundle.EditAreaLabel_mailSmtpConnectiontimeout} (millis)</label>
+                                <div class="col-sm-8">
+                                    <h:inputText id="mailSmtpConnectiontimeout" value="#{areaController.selected.mailSmtpConnectiontimeout}" styleClass="form-control"
+                                                 title="#{bundle.EditAreaTitle_mailSmtpConnectiontimeout} (0 significa desabilitado)" disabled="#{areaController.sendMailExchange}"/>
+                                </div>
+                            </div>
+                            <div class="row form-group">
+                                <label class="col-sm-4 control-label">#{bundle.EditAreaLabel_mailSmtpTimeout} (millis)</label>
+                                <div class="col-sm-8">
+                                    <h:inputText id="mailSmtpTimeout" value="#{areaController.selected.mailSmtpTimeout}" styleClass="form-control"
+                                                 title="#{bundle.EditAreaTitle_mailSmtpTimeout} (0 significa desabilitado)" disabled="#{areaController.sendMailExchange}"/>
+
+                                </div>
+                            </div>
+                            
+                             <div class="panel-footer text-right">
+                                 
+                                  <p:commandLink action="#{areaController.prepareList}" styleClass="btn btn-default"
+                                           immediate="true" ajax="false">
+                                <i class=""></i>#{bundle.EditAreaShowAllLink}
+                            </p:commandLink>
+                                  &nbsp;
+                            <p:commandLink action="#{areaController.update}" ajax="false" styleClass="btn btn-primary">
+                                <i class=""></i> #{bundle.SaveLink}
+                            </p:commandLink>        
+                           
+                           
+
+                        </div>
+                        </div>
+
+                    </h:panelGroup>
+                 </h:form>
+                    </div>
+                    
+                    <div class="col-lg-3 col-md-3">
+                        
+                    </div>
+                 
+             </div>
+
+        
+
+
+
+
+        </ui:define>
+
+        <ui:define name="dialogs">
+            
+            <p:dialog id="confirmDialog" showEffect="fade" hideEffect="fade" 
+                          header="Iniciando proceso de eliminación" widgetVar="confirmation">
+
+                    <h:outputText value="Está seguro de eliminar el Area  #{areaController.selected.nombre}?"/>
+
+                    <f:facet name="footer">
+                        <p:commandButton id="confirm" value="#{bundle.yesDelete}" actionListener="#{areaController.destroy()}" 
+                                         update="form" oncomplete="confirmation.hide()"/>
+                        <p:commandButton id="decline" value="#{bundle.decline}" onclick="confirmation.hide()" type="button" /> 
+                    </f:facet>
+
+                </p:dialog>
+            
+            <p:dialog header="Editar texto html" widgetVar="textohtml" modal="true" appendTo="@(body)" resizable="true">
+                <p:commandLink id="overlayBtn" value="Marcadores de posición"  />  
+                <p:overlayPanel id="MarcadoresPanel" for="overlayBtn" hideEffect="fade" dynamic="true"> 
+                    <p:dataTable value="#{clippingController.availablePlaceHolders}" var="holder" emptyMessage="No hay placeholders disponibles.">
+                        <p:column headerText="Marcadores de posición">
+                            <h:outputText value="\${#{holder}}"/>
+                        </p:column>
+                        <f:facet name="footer">
+                            <h:outputText value="Utilice marcadores de posición para insertar información (del caso) usada con frecuencia fácilmente en el texto."/>
+                        </f:facet>
+                    </p:dataTable>
+                </p:overlayPanel>
+                <br/>
+
+                <h:form id="formtextoRespAutomatica">
+                    <pe:ckEditor value="#{areaController.selected.textoRespAutomatica}"
+                                 toolbar="#{applicationBean.ckEditorToolbar}"
+                                 id="respuesta" width="100%" height="210"/>
+                    <br/>
+
+                    <p:commandButton value="Enviar" style="float: right;" oncomplete="textohtml.hide();"/>
+                </h:form>
+            </p:dialog>
+        </ui:define>
+    </ui:composition>
+
+</html>
